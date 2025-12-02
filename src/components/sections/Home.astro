@@ -1,14 +1,47 @@
-<section id="home" class="section home-section">
-    <div class="home-container">
-        <h1 class="hero-title">hi, i'm asteria!</h1>
-        <p class="hero-summary">
-            this is a very boring blob of text no one will ever read and will get replaced!
-        </p>
-    </div>
-    <hr/>
-</section>
-
 <style>
+
+.asteria {
+    position: relative;
+    display: inline-block;
+    transition: filter 0.3s ease, text-shadow 0.3s ease;
+}
+
+.asteria::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -3px; 
+    width: 100%;
+    height: 2px;
+    background: var(--main-accent);
+    opacity: 0;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.asteria:hover {
+    animation: none;
+    filter: brightness(1.15);
+    text-shadow: 0 0 10px var(--main-accent), 
+                 0 0 50px var(--main-accent);
+}
+
+.asteria:hover::after {
+    opacity: 1;
+    transform: scaleX(1);
+}
+
+
+@keyframes starlight {
+    0%, 100% {
+        background-position: 0%;
+    }
+    50% {
+        background-position: 100%;
+    }
+}
+
 .home-section {
     display: block;
     margin-top: 40px; 
@@ -28,3 +61,16 @@ hr {
     width: 100%;
 }
 </style>
+
+<section id="home" class="section home-section">
+    <div class="home-container">
+        <h1 class="hero-title">
+            hi, i'm <span class="asteria">asteria</span>!
+        </h1>
+
+        <p class="hero-summary">
+            this is a very boring blob of text no one will ever read and will get replaced!
+        </p>
+    </div>
+    <hr />
+</section>
