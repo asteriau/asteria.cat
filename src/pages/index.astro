@@ -1,16 +1,40 @@
 ---
-
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Navbar from '../components/Navbar.astro';
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<BaseLayout>
+    <Navbar />
+    
+    <main class="main-content">
+        <section id="home" class="section">
+            <div class="home-container">
+                <h1 class="hero-title">hi, i'm asteria!</h1>
+                <p class="hero-summary">
+                    this is a very boring blob of text no one will ever read and will get replaced!
+                </p>
+            </div>
+        </section>
+
+        <section id="about" class="section">
+            <div class="section-content">
+                <h2 class="section-title">about</h2>
+                <p>Coming soon...</p>
+            </div>
+        </section>
+
+        <section id="projects" class="section">
+            <div class="section-content">
+                <h2 class="section-title">projects</h2>
+                <p>Coming soon...</p>
+            </div>
+        </section>
+
+        <section id="contact" class="section">
+            <div class="section-content">
+                <h2 class="section-title">contact</h2>
+                <p>Coming soon...</p>
+            </div>
+        </section>
+    </main>
+</BaseLayout>

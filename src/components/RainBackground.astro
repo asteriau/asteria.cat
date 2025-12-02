@@ -1,0 +1,94 @@
+<div class="rain-background" id="rainBackground"></div>
+
+<script is:inline>
+// Simple inline script - Astro will process this as-is
+class RainManager {
+    constructor(rainBackgroundId = 'rainBackground') {
+        this.rainBackground = document.getElementById(rainBackgroundId);
+        if (!this.rainBackground) {
+            console.error('Rain background element not found');
+            return;
+        }
+        this.lastDropTime = 0;
+        this.dropInterval = 5;
+        this.animationId = null;
+        this.isRunning = false;
+        this.init();
+    }
+
+    init() {
+        this.startRain();
+    }
+
+    createRain() {
+        const raindrop = document.createElement('div');
+        raindrop.className = 'raindrop';
+        
+        raindrop.style.left = `${Math.random() * 100}vw`;
+        raindrop.style.height = `${15 + Math.random() * 10}px`;
+        raindrop.style.animationDuration = `${0.8 + Math.random() * 0.7}s`;
+        raindrop.style.opacity = 0.2 + Math.random() * 0.2;
+        
+        this.rainBackground.appendChild(raindrop);
+
+        // Clean up after animation ends
+        raindrop.addEventListener('animationend', () => {
+            raindrop.remove();
+        });
+    }
+
+    rainLoop(timestamp) {
+        if (!this.isRunning) return;
+
+        if (!this.lastDropTime) this.lastDropTime = timestamp;
+        const elapsed = timestamp - this.lastDropTime;
+
+        if (elapsed > this.dropInterval) {
+            this.createRain();
+            this.lastDropTime = timestamp - (elapsed % this.dropInterval);
+        }
+
+        this.animationId = requestAnimationFrame((ts) => this.rainLoop(ts));
+    }
+
+    startRain() {
+        if (this.isRunning) return;
+        
+        this.isRunning = true;
+        this.lastDropTime = 0;
+        this.animationId = requestAnimationFrame((ts) => this.rainLoop(ts));
+    }
+
+    stopRain() {
+        this.isRunning = false;
+        if (this.animationId) {
+            cancelAnimationFrame(this.animationId);
+            this.animationId = null;
+        }
+    }
+
+    handleVisibilityChange() {
+        if (document.hidden) {
+            this.stopRain();
+        } else {
+            this.startRain();
+        }
+    }
+}
+
+// Initialize when DOM is fully loaded
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initRain);
+} else {
+    initRain();
+}
+
+function initRain() {
+    const rainManager = new RainManager('rainBackground');
+    
+    // Resume rain when tab becomes visible
+    document.addEventListener('visibilitychange', () => {
+        rainManager.handleVisibilityChange();
+    });
+}
+</script>

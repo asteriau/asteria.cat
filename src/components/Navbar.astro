@@ -1,0 +1,60 @@
+---
+import RainBackground from './RainBackground.astro';
+---
+
+<RainBackground />
+
+<nav class="navbar">
+    <div class="nav-container">
+        <div class="nav-brand">asteria.moe</div>
+        <ul class="nav-menu">
+            <li><a href="#home" class="nav-link active">home</a></li>
+            <li><a href="#about" class="nav-link">about</a></li>
+            <li><a href="#projects" class="nav-link">projects</a></li>
+            <li><a href="#contact" class="nav-link">contact</a></li>
+        </ul>
+    </div>
+</nav>
+
+<script>
+// Navigation stuff with proper type casting :D
+document.addEventListener('DOMContentLoaded', () => {
+    const navLinks = document.querySelectorAll('.nav-link');
+    const sections = document.querySelectorAll('.section');
+
+    const updateActiveLink = () => {
+        let currentSection = '';
+
+        sections.forEach((section) => {
+            // Cast to HTMLElement to access offsetTop
+            const htmlElement = section as HTMLElement;
+            const sectionTop = htmlElement.offsetTop;
+            const sectionId = section.getAttribute('id');
+            
+            if (window.scrollY >= sectionTop - 100 && sectionId) {
+                currentSection = sectionId;
+            }
+        });
+
+        navLinks.forEach((link) => {
+            link.classList.remove('active');
+            const href = link.getAttribute('href');
+            
+            // Compare without the # symbol
+            if (href && href.substring(1) === currentSection) {
+                link.classList.add('active');
+            }
+        });
+    };
+
+    navLinks.forEach((link) => {
+        link.addEventListener('click', () => {
+            navLinks.forEach(l => l.classList.remove('active'));
+            link.classList.add('active');
+        });
+    });
+
+    window.addEventListener('scroll', updateActiveLink);
+    updateActiveLink();
+});
+</script>
