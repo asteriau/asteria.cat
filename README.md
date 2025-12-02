@@ -10,5 +10,10 @@ All commands are run from the root of the project, from a terminal:
 | `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
 | `npm run astro -- --help` | Get help using the Astro CLI                     |
 
+## TO-DO
+- [ ] improve rain density and add thunder 
+- [ ] fix mobile responsiveness
+- [x] be tuff
+
 ## Credits
 - [Paradise Theme](https://github.com/paradise-theme/paradise)
