@@ -2,23 +2,20 @@
 import '../styles/global.css';
 import Footer from '../components/Footer.astro';
 
-// Detect environment
-const isProd = import.meta.env.MODE === "production"; // "production" on Vercel production deploy
-const siteUrl = isProd ? "https://asteria.moe" : ""; // empty for preview/local
-
 // Props for page-specific metadata
 export interface Props {
-  title?: string;
-  description?: string;
-  canonicalUrl?: string;
-  socialImageUrl?: string;
+  title?: string;         // Page-specific title
+  description?: string;   // Page description
+  canonicalUrl?: string;  // Full URL for canonical / OG
+  socialImageUrl?: string; // OG / Twitter image
 }
 
+// Defaults
 const {
-  title = "asteria's website",
+  title = "asteria's website",                   // title for discord / OG
   description = "meow meow meow meow meow meow",
-  canonicalUrl = siteUrl || "/",
-  socialImageUrl = (siteUrl ? siteUrl : "") + "/social-image.png",
+  canonicalUrl = "/",                              // relative URL works on all environments
+  socialImageUrl = "/social-image.png",           // relative path from public/
 } = Astro.props;
 ---
 
@@ -26,13 +23,13 @@ const {
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#f49898">
+    <meta name="theme-color" content="#8DA3B9">
 
     <title>{title}</title>
     <meta name="description" content={description}>
     <link rel="canonical" href={canonicalUrl}>
 
-    <!-- Open Graph -->
+    <!-- Open Graph / Discord -->
     <meta property="og:site_name" content="asteria.moe">
     <meta property="og:type" content="website">
     <meta property="og:url" content={canonicalUrl}>
@@ -41,8 +38,8 @@ const {
     <meta property="og:image" content={socialImageUrl}>
 
     <!-- Twitter -->
-    <meta name="twitter:card" content="summary">
-    <meta name="twitter:site" content="@yourTwitterHandle">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@asteriau">
     <meta name="twitter:title" content={title}>
     <meta name="twitter:description" content={description}>
     <meta name="twitter:image" content={socialImageUrl}>
