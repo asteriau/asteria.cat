@@ -2,6 +2,11 @@
 import '../styles/global.css';
 import Footer from '../components/Footer.astro';
 
+// Detect environment
+const isProd = import.meta.env.MODE === "production"; // "production" on Vercel production deploy
+const siteUrl = isProd ? "https://asteria.moe" : ""; // empty for preview/local
+
+// Props for page-specific metadata
 export interface Props {
   title?: string;
   description?: string;
@@ -10,10 +15,10 @@ export interface Props {
 }
 
 const {
-  title = "asteria.moe",
-  description = "Silliest little site",
-  canonicalUrl = "https://asteria.moe",
-  socialImageUrl = "https://asteria.moe/social-image.png",
+  title = "asteria's website",
+  description = "meow meow meow meow meow meow",
+  canonicalUrl = siteUrl || "/",
+  socialImageUrl = (siteUrl ? siteUrl : "") + "/social-image.png",
 } = Astro.props;
 ---
 
@@ -21,25 +26,27 @@ const {
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#8DA3B9">
-    
+    <meta name="theme-color" content="#f49898">
+
     <title>{title}</title>
     <meta name="description" content={description}>
     <link rel="canonical" href={canonicalUrl}>
-    
+
+    <!-- Open Graph -->
     <meta property="og:site_name" content="asteria.moe">
     <meta property="og:type" content="website">
     <meta property="og:url" content={canonicalUrl}>
     <meta property="og:title" content={title}>
     <meta property="og:description" content={description}>
     <meta property="og:image" content={socialImageUrl}>
-    
-    <meta name="twitter:card" content="blehhh">
-    <meta name="twitter:site" content="@yourmom">
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@yourTwitterHandle">
     <meta name="twitter:title" content={title}>
     <meta name="twitter:description" content={description}>
     <meta name="twitter:image" content={socialImageUrl}>
-    
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   </head>
   <body>
