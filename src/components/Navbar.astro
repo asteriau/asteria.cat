@@ -2,78 +2,252 @@
 import RainBackground from './Rain.astro';
 ---
 
-<RainBackground />
+<RainBackground /> <!-- we needa import this here cuz im too lazy to make actual pagination twt -->
 
 <nav class="navbar">
     <div class="nav-container">
         <ul class="nav-menu">
-            <li><a href="#home" class="nav-link">home</a></li>
-            <li><a href="#about" class="nav-link">about</a></li>
-            <li><a href="#projects" class="nav-link">projects</a></li>
-            <li><a href="#contact" class="nav-link">contact</a></li>
+            <li><a href="#home" class="nav-link" data-section="home">home</a></li>
+            <li><a href="#about" class="nav-link" data-section="about">about</a></li>
+            <li><a href="#projects" class="nav-link" data-section="projects">projects</a></li>
+            <li><a href="#contact" class="nav-link" data-section="contact">contact</a></li>
         </ul>
     </div>
 </nav>
 
 <script>
+// Wait for DOM to be fully loaded
 document.addEventListener('DOMContentLoaded', () => {
-    const navLinks = document.querySelectorAll('.nav-link');
-    const sections = document.querySelectorAll('.section');
-
-    const updateActiveLink = () => {
-        let currentSection = '';
-
-        sections.forEach((section) => {
-            const sectionTop = (section as HTMLElement).offsetTop;
-            const sectionId = section.getAttribute('id');
-            
-            if (window.scrollY >= sectionTop - 100 && sectionId) {
-                currentSection = sectionId;
-            }
-        });
-
-        navLinks.forEach((link) => {
-            link.classList.remove('active');
-            const href = link.getAttribute('href');
-            
-            if (href && href.substring(1) === currentSection) {
-                link.classList.add('active');
-            }
+    // Elements - add type annotations
+    const navLinks = document.querySelectorAll<HTMLAnchorElement>('.nav-link');
+    const sections = document.querySelectorAll<HTMLElement>('section[id]');
+    const navContainer = document.querySelector<HTMLDivElement>('.nav-container');
+    const navbar = document.querySelector<HTMLElement>('.navbar');
+    
+    // Early return if essential elements don't exist
+    if (!navContainer || !navbar) {
+        console.error('Navigation elements not found');
+        return;
+    }
+    
+    // Create and insert indicator
+    const navIndicator = document.createElement('div');
+    navIndicator.className = 'nav-indicator';
+    navContainer.appendChild(navIndicator);
+    
+    // State - add type annotations
+    let isScrolling = false;
+    let scrollTimeout: number | null = null;
+    
+    /**
+     * Calculate the optimal position and width for the indicator
+     * @param targetElement - The nav link element to position under
+     */
+    const updateIndicatorPosition = (targetElement: HTMLAnchorElement) => {
+        if (!targetElement || !navIndicator || !navContainer) return;
+        
+        // Get dimensions
+        const linkRect = targetElement.getBoundingClientRect();
+        const containerRect = navContainer.getBoundingClientRect();
+        
+        // Calculate position relative to nav container
+        const relativeLeft = linkRect.left - containerRect.left;
+        
+        // Set indicator width and position
+        navIndicator.style.width = `${linkRect.width}px`;
+        navIndicator.style.left = `${relativeLeft}px`;
+        navIndicator.style.bottom = '0'; // Align with bottom of navbar
+        
+        // Add sparkle effect data attribute
+        const section = targetElement.dataset.section;
+        if (section) {
+            navIndicator.setAttribute('data-active-section', section);
+        }
+        
+        console.log('Indicator updated to:', {
+            section: targetElement.dataset.section,
+            width: linkRect.width,
+            left: relativeLeft
         });
     };
-
-    navLinks.forEach((link) => {
-        link.addEventListener('click', (e) => {
-            e.preventDefault();
+    
+    /**
+     * Update active nav link based on scroll position
+     */
+    const updateActiveLink = () => {
+        if (isScrolling) return;
+        
+        // Find the section currently in view
+        let currentSectionId = '';
+        const scrollPosition = window.scrollY + window.innerHeight * 0.3;
+        
+        sections.forEach(section => {
+            const sectionTop = section.offsetTop;
+            const sectionBottom = sectionTop + section.offsetHeight;
+            const sectionId = section.id;
             
-            const href = link.getAttribute('href');
-            if (href && href.startsWith('#')) {
-                const targetId = href.substring(1);
-                
-                // Update active link immediately
-                navLinks.forEach(l => l.classList.remove('active'));
-                link.classList.add('active');
-                
-                // Scroll to target with smooth behavior
-                if (targetId === 'home') {
-                    window.scrollTo({
-                        top: 0,
-                        behavior: 'smooth'
-                    });
-                } else {
-                    const targetElement = document.getElementById(targetId);
-                    if (targetElement) {
-                        targetElement.scrollIntoView({
-                            behavior: 'smooth',
-                            block: 'start'
-                        });
-                    }
-                }
+            if (scrollPosition >= sectionTop && scrollPosition <= sectionBottom && sectionId) {
+                currentSectionId = sectionId;
             }
         });
+        
+        // Fallback to home if at top
+        if (!currentSectionId && window.scrollY < 100) {
+            currentSectionId = 'home';
+        }
+        
+        // Update nav links
+        navLinks.forEach(link => {
+            const href = link.getAttribute('href');
+            if (!href) return;
+            
+            const linkSection = href.substring(1);
+            const isActive = linkSection === currentSectionId;
+            
+            link.classList.toggle('active', isActive);
+            
+            // Update indicator if this link is active
+            if (isActive) {
+                updateIndicatorPosition(link);
+            }
+        });
+        
+        // Special case: If no section found but we're scrolled, find closest
+        if (!currentSectionId && sections.length > 0) {
+            const lastSection = sections[sections.length - 1];
+            const firstSection = sections[0];
+            
+            if (window.scrollY + window.innerHeight >= document.body.scrollHeight - 100) {
+                currentSectionId = lastSection.id;
+            } else if (window.scrollY <= firstSection.offsetTop) {
+                currentSectionId = firstSection.id;
+            }
+        }
+    };
+    
+    /**
+     * Handle smooth scrolling to sections
+     * @param event - Click event
+     */
+    const handleNavClick = (event: MouseEvent) => {
+        event.preventDefault();
+        
+        const clickedLink = event.currentTarget as HTMLAnchorElement;
+        const targetId = clickedLink.getAttribute('href')?.substring(1);
+        
+        if (!targetId) return;
+        
+        const targetSection = document.getElementById(targetId);
+        
+        if (!targetSection) return;
+        
+        // Immediately update active state
+        navLinks.forEach(link => link.classList.remove('active'));
+        clickedLink.classList.add('active');
+        updateIndicatorPosition(clickedLink);
+        
+        // Set scrolling flag
+        isScrolling = true;
+        
+        // Clear any existing timeout
+        if (scrollTimeout) {
+            clearTimeout(scrollTimeout);
+            scrollTimeout = null;
+        }
+        
+        // Calculate scroll position with offset
+        const targetPosition = targetSection.offsetTop;
+        const navbarHeight = navbar?.offsetHeight || 0;
+        const offsetPosition = targetPosition - navbarHeight + 1;
+        
+        // Smooth scroll to target
+        window.scrollTo({
+            top: targetId === 'home' ? 0 : offsetPosition,
+            behavior: 'smooth'
+        });
+        
+        // Reset scrolling flag after scroll completes
+        scrollTimeout = window.setTimeout(() => {
+            isScrolling = false;
+            updateActiveLink(); // Final position check
+        }, 600);
+    };
+    
+    /**
+     * Initialize the indicator to the first active link
+     */
+    const initializeIndicator = () => {
+        // Find home link or first active link
+        const homeLink = document.querySelector<HTMLAnchorElement>('.nav-link[href="#home"]');
+        const activeLink = document.querySelector<HTMLAnchorElement>('.nav-link.active') || homeLink;
+        
+        if (activeLink) {
+            activeLink.classList.add('active');
+            updateIndicatorPosition(activeLink);
+        } else if (navLinks.length > 0) {
+            // Default to first link
+            navLinks[0].classList.add('active');
+            updateIndicatorPosition(navLinks[0]);
+        }
+        
+        console.log('Indicator initialized');
+    };
+    
+    /**
+     * Handle window resize
+     */
+    const handleResize = () => {
+        const activeLink = document.querySelector<HTMLAnchorElement>('.nav-link.active');
+        if (activeLink) {
+            updateIndicatorPosition(activeLink);
+        }
+    };
+    
+    /**
+     * Handle scroll events with throttling
+     */
+    let scrollThrottleTimeout: number | null = null;
+    const handleScroll = () => {
+        if (scrollThrottleTimeout) return;
+        
+        scrollThrottleTimeout = window.setTimeout(() => {
+            updateActiveLink();
+            scrollThrottleTimeout = null;
+        }, 100);
+    };
+    
+    // Initialize
+    initializeIndicator();
+    
+    // Event Listeners
+    navLinks.forEach(link => {
+        link.addEventListener('click', handleNavClick);
     });
-
-    window.addEventListener('scroll', updateActiveLink);
-    updateActiveLink();
+    
+    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('resize', handleResize);
+    
+    // Cleanup function
+    const cleanup = () => {
+        navLinks.forEach(link => {
+            link.removeEventListener('click', handleNavClick);
+        });
+        window.removeEventListener('scroll', handleScroll);
+        window.removeEventListener('resize', handleResize);
+        if (scrollTimeout) {
+            clearTimeout(scrollTimeout);
+            scrollTimeout = null;
+        }
+        if (scrollThrottleTimeout) {
+            clearTimeout(scrollThrottleTimeout);
+            scrollThrottleTimeout = null;
+        }
+    };
+    
+    if (typeof window !== 'undefined') {
+        window.addEventListener('beforeunload', cleanup);
+    }
+    
+    console.log('Navigation initialized');
 });
 </script>
