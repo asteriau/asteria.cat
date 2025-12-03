@@ -1,5 +1,5 @@
 <script lang="ts">
-  import Rain from './Rain.svelte';
+  import LightRays from './LightRays.svelte';
   import { onMount, afterUpdate } from 'svelte';
 
   export let current: string;
@@ -44,7 +44,7 @@
   });
 </script>
 
-<Rain />
+<LightRays />
 
 <nav bind:this={navContainer} class="navbar">
   <div class="nav-container">
@@ -56,13 +56,3 @@
     </ul>
   </div>
 </nav>
-
-<style>
-  /* Add your nav-indicator styles */
-  .nav-indicator {
-    position: absolute;
-    height: 2px;
-    background-color: red;
-    transition: all 0.3s ease;
-  }
-</style>
