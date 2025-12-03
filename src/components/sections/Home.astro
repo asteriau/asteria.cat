@@ -10,7 +10,7 @@
     content: "";
     position: absolute;
     left: 0;
-    bottom: -3px; 
+    bottom: -3px;
     width: 100%;
     height: 2px;
     background: var(--main-accent);
@@ -23,7 +23,7 @@
 .asteria:hover {
     animation: none;
     filter: brightness(1.15);
-    text-shadow: 0 0 10px var(--main-accent), 
+    text-shadow: 0 0 10px var(--main-accent),
                  0 0 50px var(--main-accent);
 }
 
@@ -32,25 +32,15 @@
     transform: scaleX(1);
 }
 
-
-@keyframes starlight {
-    0%, 100% {
-        background-position: 0%;
-    }
-    50% {
-        background-position: 100%;
-    }
-}
-
 .home-section {
     display: block;
-    margin-top: 40px; 
+    margin-top: 40px;
 }
 
 .home-container {
     text-align: left;
     margin: 0 auto;
-    max-width: 900px; 
+    max-width: 900px;
 }
 
 hr {
@@ -59,6 +49,18 @@ hr {
     margin: 20px auto;
     max-width: 900px;
     width: 100%;
+}
+
+.divider-bar {
+    margin: 20px auto;
+    max-width: 900px;
+    width: 100%;
+    height: 60px;
+    background: rgba(21, 21, 21, 0.95);
+    border: 0.5px solid var(--color-border);
+    border-radius: 4px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 </style>
 
@@ -73,4 +75,5 @@ hr {
         </p>
     </div>
     <hr />
+    <div class="divider-bar"></div>
 </section>
