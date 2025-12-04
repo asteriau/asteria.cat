@@ -29,7 +29,6 @@
 	let scrollContainerElement: HTMLDivElement;
 	let animationFrameId: number;
 	let spotifyProgress = 0;
-	let scrollProgress = 0;
 	
 	// For syncing
 	let currentTimeMs = 0;
@@ -40,7 +39,7 @@
 	let nowPlayingVisible = true;
 	let lyricsVisible = false;
 	
-	// FIX: Added the missing sectionTitles declaration
+	// Section tracking
 	let sectionTitles: { [key: string]: boolean } = {
 		'now-playing': true,
 		'lyrics': false
@@ -202,9 +201,6 @@
 		const container = scrollContainerElement;
 		const scrollTop = container.scrollTop;
 		const containerHeight = container.clientHeight;
-		const scrollHeight = container.scrollHeight;
-
-		scrollProgress = scrollHeight > containerHeight ? (scrollTop / (scrollHeight - containerHeight)) * 100 : 0;
 
 		// Determine which section is visible
 		const scrollMiddle = scrollTop + containerHeight / 2;
@@ -309,7 +305,7 @@
 		 on:scroll|passive={handleScroll}
 		 bind:this={scrollContainerElement}>
 		
-		<!-- Sticky Section Titles on the RIGHT -->
+		<!-- Sticky Section Titles - SIMPLIFIED -->
 		<div class="sticky-titles" aria-hidden="true">
 			<div class="sticky-title {sectionTitles['now-playing'] ? 'visible' : ''}">
 				<h3>Now Playing</h3>
@@ -319,16 +315,18 @@
 			</div>
 		</div>
 		
-		<!-- Sticky Scroll Indicator -->
+		<!-- Simplified Scroll Indicator -->
 		<div class="scroll-indicator" aria-hidden="true">
 			<div class="scroll-track" role="presentation">
 				<div class="scroll-circle scroll-top {sectionTitles['now-playing'] ? 'active' : ''}" 
-					 on:click={() => scrollToSection('now-playing')}></div>
+					 on:click={() => scrollToSection('now-playing')}
+					 title="Scroll to Now Playing"></div>
 				
 				<div class="scroll-line" aria-hidden="true"></div>
 				
 				<div class="scroll-circle scroll-bottom {sectionTitles['lyrics'] ? 'active' : ''}"
-					 on:click={() => scrollToSection('lyrics')}></div>
+					 on:click={() => scrollToSection('lyrics')}
+					 title="Scroll to Lyrics"></div>
 			</div>
 		</div>
 
@@ -343,7 +341,7 @@
 								<img
 									src={spotifyImage}
 									alt={spotifyActivity}
-									class="big {isPlaying ? 'spin' : ''}"
+									class="big"
 									style="border-radius: 50%;"
 									on:error={(e) => {
 										const target = e.target as HTMLImageElement;
@@ -363,9 +361,6 @@
 							{:else}
 								<h3 class="song-title last-played">
 									{spotifyActivity || 'Unknown Song'}
-									{#if lastPlayed}
-										<span class="last-played-time">({formatLastPlayedTime(JSON.parse(localStorage.getItem('lastPlayedSpotify') || '{"last_played":0}').last_played || Date.now())})</span>
-									{/if}
 								</h3>
 							{/if}
 
@@ -385,7 +380,9 @@
 										class={isPlaying ? 'playing' : 'last-played'}
 									/>
 									{#if !isPlaying && lastPlayed}
-										<p class="last-played-label">Last Played</p>
+										<p class="last-played-label">
+											Last Played {formatLastPlayedTime(JSON.parse(localStorage.getItem('lastPlayedSpotify') || '{"last_played":0}').last_played || Date.now())}
+										</p>
 									{/if}
 								</div>
 							{/if}
@@ -438,10 +435,14 @@
 		padding: 1rem;
 
 		&.spotify-box {
-			height: 200px;
+			height: 180px !important;
+			min-height: 180px !important;
+			max-height: 180px !important;
 			overflow: hidden;
 			padding: 0;
 			position: relative;
+			box-sizing: border-box;
+			width: 100%;
 		}
 	}
 
@@ -451,9 +452,6 @@
 		scroll-behavior: smooth;
 		-webkit-overflow-scrolling: touch;
 		scrollbar-width: none;
-		position: relative;
-		
-		/* Snap scrolling */
 		scroll-snap-type: y mandatory;
 		scroll-snap-stop: always;
 
@@ -463,66 +461,66 @@
 	}
 
 	.sticky-titles {
-		position: sticky;
+		position: absolute;
 		top: 0;
 		right: 0;
 		z-index: 20;
-		height: 40px;
 		display: flex;
 		flex-direction: column;
 		align-items: flex-end;
-		padding: 0 1rem;
-		background: linear-gradient(to bottom, rgba(25, 25, 25, 0.95) 0%, rgba(25, 25, 25, 0.8) 50%, transparent 100%);
+		padding: 0.75rem 0.5rem 0 0;
+		background: transparent;
 		pointer-events: none;
+		width: 100%;
+		box-sizing: border-box;
+		height: 100%;
 		
 		.sticky-title {
-			position: absolute;
 			opacity: 0;
 			transform: translateY(-10px);
 			transition: all 0.25s ease;
 			pointer-events: none;
 			text-align: right;
+			margin-bottom: 0.25rem;
+			position: absolute;
+			top: 0.75rem;
+			right: 0.5rem;
 			
 			h3 {
 				margin: 0;
-				font-size: 1rem;
+				font-size: 0.9rem;
 				font-weight: 600;
 				color: #8DA3B9;
 				text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+				padding: 0.15rem 0.35rem;
+				background: rgba(25, 25, 25, 0.7);
+				border-radius: 4px;
+				backdrop-filter: blur(4px);
 			}
 			
 			&.visible {
 				opacity: 1;
 				transform: translateY(0);
 			}
-			
-			&:first-child {
-				top: 8px;
-			}
-			
-			&:last-child {
-				top: 8px;
-			}
 		}
 	}
 
 	.scroll-indicator {
-		position: sticky;
-		top: 50%;
-		right: 0.75rem;
-		transform: translateY(-50%);
-		z-index: 30;
-		height: 80px;
+		position: absolute;
+		top: 0;
+		right: 0;
+		z-index: 40;
+		height: 100%;
+		width: 1.5rem;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		float: right;
-		margin-right: 0.25rem;
+		pointer-events: none;
 	}
 
 	.scroll-track {
 		position: relative;
-		height: 80px;
+		height: 60px;
 		width: 2px;
 		background: rgba(141, 163, 185, 0.1);
 		border-radius: 1px;
@@ -530,6 +528,7 @@
 		flex-direction: column;
 		align-items: center;
 		justify-content: space-between;
+		pointer-events: auto;
 	}
 
 	.scroll-circle {
@@ -566,7 +565,6 @@
 		width: 2px;
 		background: linear-gradient(180deg, transparent, rgba(141, 163, 185, 0.6), transparent);
 		order: 2;
-		position: relative;
 	}
 
 	.sections-container {
@@ -598,6 +596,8 @@
 			display: flex;
 			flex-direction: column;
 			justify-content: center;
+			padding-top: 1rem;
+			padding-bottom: 1rem;
 		}
 	}
 
@@ -606,9 +606,10 @@
 			display: flex;
 			gap: 1rem;
 			align-items: center;
-			justify-content: center;
+			justify-content: flex-start;
 			width: 100%;
 			flex-wrap: wrap;
+			margin-top: 0;
 		}
 
 		.rpc-images {
@@ -622,21 +623,13 @@
 			user-select: none;
 			transition: all 0.3s ease;
 			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-
-			&.spin {
-				animation: rotate 20s linear infinite;
-				animation-play-state: running;
-			}
-			
-			&:not(.spin) {
-				animation-play-state: paused;
-			}
 		}
 
 		.rpc-text {
 			flex: 1;
 			min-width: 0;
-			max-width: 200px;
+			max-width: calc(100% - 120px);
+			text-align: left;
 
 			.song-title {
 				margin: 0 0 0.5rem 0;
@@ -651,15 +644,6 @@
 
 				&.last-played {
 					opacity: 0.8;
-
-					.last-played-time {
-						font-size: 0.85rem;
-						font-weight: 400;
-						opacity: 0.7;
-						margin-left: 0.5rem;
-						display: block;
-						margin-top: 0.25rem;
-					}
 				}
 			}
 
@@ -691,7 +675,7 @@
 					font-size: 0.8rem;
 					font-weight: 400;
 					opacity: 0.6;
-					text-align: center;
+					text-align: left;
 				}
 			}
 
@@ -760,6 +744,7 @@
 			gap: 0.5rem;
 			height: 100%;
 			width: 100%;
+			padding-top: 0.5rem;
 		}
 
 		.lyric-line-wrapper {
@@ -814,15 +799,11 @@
 		}
 	}
 
-	@keyframes rotate {
-		0% { transform: rotate(0deg); }
-		100% { transform: rotate(360deg); }
-	}
-
-	/* Mobile stuff */
 	@media (max-width: 768px) {
 		.rpc-box.spotify-box {
 			height: 160px !important;
+			min-height: 160px !important;
+			max-height: 160px !important;
 		}
 		
 		.sections-container {
@@ -835,7 +816,26 @@
 			
 			.section-content {
 				padding: 0 0.75rem;
+				padding-top: 0.75rem;
 			}
+		}
+		
+		.sticky-titles {
+			padding: 0.75rem 0.25rem 0 0;
+			
+			.sticky-title {
+				top: 0.75rem;
+				right: 0.25rem;
+				
+				h3 {
+					font-size: 0.8rem;
+					padding: 0.1rem 0.25rem;
+				}
+			}
+		}
+		
+		.scroll-indicator {
+			width: 1.25rem;
 		}
 		
 		.now-playing-section {
@@ -851,18 +851,11 @@
 			
 			.rpc-text {
 				max-width: calc(100% - 90px);
+				text-align: left;
 				
 				.song-title {
 					font-size: 1rem;
 					-webkit-line-clamp: 1;
-					
-					&.last-played {
-						.last-played-time {
-							font-size: 0.8rem;
-							margin-left: 0.25rem;
-							display: inline;
-						}
-					}
 				}
 				
 				h5 {
@@ -876,6 +869,10 @@
 		}
 		
 		.lyrics-section {
+			.lyrics-container {
+				padding-top: 0.25rem;
+			}
+			
 			.lyric-line {
 				font-size: 0.9rem;
 				padding: 0.2rem 0;
@@ -886,23 +883,40 @@
 				}
 			}
 		}
-		
-		.scroll-indicator {
-			right: 0.5rem;
-		}
-		
-		.sticky-titles {
-			padding: 0 0.5rem;
-			
-			.sticky-title h3 {
-				font-size: 0.9rem;
-			}
-		}
 	}
 
 	@media (max-width: 480px) {
 		.rpc-box.spotify-box {
 			height: 140px !important;
+			min-height: 140px !important;
+			max-height: 140px !important;
+		}
+		
+		.sticky-titles {
+			padding: 0.75rem 0.15rem 0 0;
+			
+			.sticky-title {
+				top: 0.75rem;
+				right: 0.15rem;
+				
+				h3 {
+					font-size: 0.75rem;
+					padding: 0.08rem 0.15rem;
+				}
+			}
+		}
+		
+		.scroll-indicator {
+			width: 1rem;
+			
+			.scroll-track {
+				height: 50px;
+			}
+			
+			.scroll-circle {
+				width: 6px;
+				height: 6px;
+			}
 		}
 		
 		.now-playing-section {
@@ -917,6 +931,7 @@
 			
 			.rpc-text {
 				max-width: calc(100% - 70px);
+				text-align: left;
 				
 				.song-title {
 					font-size: 0.9rem;
@@ -947,57 +962,6 @@
 			.no-lyrics {
 				padding: 0.75rem;
 				font-size: 0.8rem;
-			}
-		}
-		
-		.scroll-indicator {
-			right: 0.25rem;
-			
-			.scroll-track {
-				height: 60px;
-			}
-			
-			.scroll-circle {
-				width: 6px;
-				height: 6px;
-			}
-		}
-		
-		.sticky-titles {
-			padding: 0 0.25rem;
-			
-			.sticky-title h3 {
-				font-size: 0.8rem;
-			}
-		}
-	}
-
-	/* Extra small devices */
-	@media (max-width: 360px) {
-		.rpc-box.spotify-box {
-			height: 130px !important;
-		}
-		
-		.now-playing-section {
-			.now-playing-container {
-				gap: 0.4rem;
-			}
-			
-			.big {
-				height: 50px;
-				width: 50px;
-			}
-			
-			.rpc-text {
-				max-width: calc(100% - 60px);
-				
-				.song-title {
-					font-size: 0.85rem;
-				}
-				
-				h5 {
-					font-size: 0.75rem;
-				}
 			}
 		}
 	}

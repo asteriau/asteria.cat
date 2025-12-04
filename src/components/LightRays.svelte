@@ -25,6 +25,7 @@
   export let noiseAmount: number = 0.0;
   export let distortion: number = 0.0;
   export let className: string = '';
+  export let fadeDuration: number = 1.0; 
 
   let container: HTMLDivElement;
   let renderer: Renderer;
@@ -34,6 +35,9 @@
 
   let mouse = { x: 0.5, y: 0.5 };
   let smoothMouse = { x: 0.5, y: 0.5 };
+  
+  // Add state for fade-in
+  let isVisible = false;
 
   const hexToRgb = (hex: string) => {
     const m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
@@ -187,6 +191,11 @@
     updatePlacement();
     animate(0);
 
+    // Trigger fade-in after a small delay to ensure rendering is ready
+    setTimeout(() => {
+      isVisible = true;
+    }, 50);
+
     onDestroy(() => {
       cancelAnimationFrame(animationId);
       window.removeEventListener('resize', updatePlacement);
@@ -203,15 +212,24 @@
 
 <style>
   .light-rays-container {
-  position: fixed; /* stay on the background */
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 0; /* behind navbar and main content */
-}
-
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0;
+    transition: opacity var(--fade-duration, 1s) ease-in-out;
+  }
+  
+  .light-rays-container.visible {
+    opacity: 1;
+  }
 </style>
 
-<div bind:this={container} class="light-rays-container {className}"></div>
+<div 
+  bind:this={container} 
+  class="light-rays-container {className} {isVisible ? 'visible' : ''}"
+  style="--fade-duration: {fadeDuration}s"
+></div>

@@ -59,15 +59,15 @@
 	.rpc-box {
 		background: rgba(25, 25, 25, 1);
 		border-radius: 12px;
-		padding: 1rem;
-		/* Match Spotify's full height - using min-height instead of height */
-		min-height: 200px;
-		height: auto; /* Allow it to grow if needed */
+		padding: 16px;
+		height: 180px !important;
+		min-height: 180px !important;
+		max-height: 180px !important;
 		display: flex;
 		flex-direction: column;
 		justify-content: center;
-		/* Ensure box-sizing includes padding */
 		box-sizing: border-box;
+		width: 100%;
 	}
 
 	.rpc-main {
@@ -77,6 +77,7 @@
 		width: 100%;
 		justify-content: center;
 		flex-wrap: wrap;
+		height: 100%;
 	}
 
 	.rpc-images {
@@ -109,7 +110,7 @@
 	.rpc-text {
 		flex: 1;
 		min-width: 0;
-		max-width: 200px;
+		max-width: calc(100% - 120px); 
 
 		h3 {
 			margin: 0 0 0.5rem 0;
@@ -146,14 +147,16 @@
 
 	@media (max-width: 768px) {
 		.rpc-box {
-			min-height: 160px;
-			padding: 0.75rem; /* Reduce padding on mobile */
+			height: 160px !important;
+			min-height: 160px !important;
+			max-height: 160px !important;
+			padding: 12px;
 		}
 
 		.rpc-main {
 			flex-direction: column;
 			align-items: center;
-			gap: 0.75rem; /* Reduce gap on mobile */
+			gap: 0.75rem;
 			justify-content: center;
 			height: 100%;
 		}
@@ -174,18 +177,18 @@
 			width: 100%;
 			max-width: none;
 			text-align: center;
-			flex: none; /* Reset flex on mobile */
+			flex: none;
 			
 			h3 {
 				font-size: 1.1rem;
 				margin-bottom: 0.25rem;
-				-webkit-line-clamp: 1; /* Single line on mobile */
+				-webkit-line-clamp: 1;
 			}
 
 			h5 {
 				font-size: 0.85rem;
 				margin: 0.15rem 0;
-				white-space: normal; /* Allow wrapping on mobile */
+				white-space: normal;
 				overflow: visible;
 			}
 		}
@@ -193,8 +196,10 @@
 
 	@media (max-width: 480px) {
 		.rpc-box {
-			min-height: 140px;
-			padding: 0.5rem; /* Further reduce padding */
+			height: 140px !important;
+			min-height: 140px !important;
+			max-height: 140px !important;
+			padding: 10px;
 		}
 
 		.rpc-main {
@@ -228,8 +233,10 @@
 
 	@media (max-width: 360px) {
 		.rpc-box {
-			min-height: 130px;
-			padding: 0.4rem;
+			height: 130px !important;
+			min-height: 130px !important;
+			max-height: 130px !important;
+			padding: 8px;
 		}
 
 		.rpc-main {

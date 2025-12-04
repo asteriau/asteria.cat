@@ -12,10 +12,10 @@ export interface Props {
 
 // Defaults
 const {
-  title = "asteria's website",                   // title for discord / OG
+  title = "asteria's website",                  
   description = "meow meow meow meow meow meow",
-  canonicalUrl = "/",                              // relative URL works on all environments
-  socialImageUrl = "/social-image.png",           // relative path from public/
+  canonicalUrl = "/",                              
+  socialImageUrl = "/social-image.png",          
 } = Astro.props;
 ---
 
@@ -44,6 +44,8 @@ const {
     <meta name="twitter:description" content={description}>
     <meta name="twitter:image" content={socialImageUrl}>
 
+    <link rel="icon" href="../favicon.ico" type="image/x-icon">
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   </head>
   <body>
@@ -51,3 +53,39 @@ const {
     <Footer />
   </body>
 </html>
+
+<script>
+  const fullTitle = "asteria";
+  let current = "";
+  let index = 0;
+  let typing = true; // true = typing, false = deleting
+  const placeholder = "•"; // this is so that the title is never empty else it'll flash
+
+  function typeTitle() {
+    if (typing) {
+      // Add next character
+      current += fullTitle[index];
+      index++;
+      document.title = current;
+      if (index === fullTitle.length) {
+        typing = false; // switch to deleting
+        setTimeout(typeTitle, 1000); // pause before deleting
+        return;
+      }
+      setTimeout(typeTitle, 200); // typing speed
+    } else {
+      // Remove last character
+      current = current.slice(0, -1);
+      // Ensure title is never fully empty
+      document.title = current.length ? current : placeholder;
+      if (current.length === 0) {
+        typing = true; // switch back to typing
+        index = 0;
+      }
+      setTimeout(typeTitle, 100); // deleting speed
+    }
+  }
+
+  // Start animation
+  typeTitle();
+</script>
