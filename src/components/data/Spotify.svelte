@@ -305,7 +305,6 @@
 		 on:scroll|passive={handleScroll}
 		 bind:this={scrollContainerElement}>
 		
-		<!-- Sticky Section Titles - SIMPLIFIED -->
 		<div class="sticky-titles" aria-hidden="true">
 			<div class="sticky-title {sectionTitles['now-playing'] ? 'visible' : ''}">
 				<h3>Now Playing</h3>
@@ -315,7 +314,6 @@
 			</div>
 		</div>
 		
-		<!-- Simplified Scroll Indicator -->
 		<div class="scroll-indicator" aria-hidden="true">
 			<div class="scroll-track" role="presentation">
 				<div class="scroll-circle scroll-top {sectionTitles['now-playing'] ? 'active' : ''}" 
@@ -330,9 +328,7 @@
 			</div>
 		</div>
 
-		<!-- Sections with snap scrolling -->
 		<div class="sections-container">
-			<!-- Now Playing Section -->
 			<section class="now-playing-section {nowPlayingVisible ? 'active' : ''}">
 				<div class="section-content">
 					<div class="now-playing-container">
@@ -391,7 +387,6 @@
 				</div>
 			</section>
 
-			<!-- Lyrics Section -->
 			<section class="lyrics-section {lyricsVisible ? 'active' : ''}">
 				<div class="section-content">
 					{#if fetchingLyrics}
