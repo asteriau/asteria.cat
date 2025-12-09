@@ -64,8 +64,6 @@
     height: 64px;
     background: rgba(21, 21, 21, 0.96);
     border-top: 0.5px solid var(--color-border);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
     box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.5);
     z-index: 110;
     display: none;
@@ -116,39 +114,42 @@
     height: 28px;
     border-radius: 999px;
     background: transparent;
-    transition: background 0.35s ease, box-shadow 0.35s ease, transform 0.35s ease;
+    transition: background 0.35s ease, box-shadow 0.35s ease, transform 0.35s ease, filter 0.35s ease;
   }
 
   .mobile-nav .icon-container svg {
     width: 24px;
     height: 24px;
     fill: var(--color-fg);
-    transition: fill 0.25s ease;
+    transition: fill 0.25s ease, filter 0.25s ease;
   }
 
   .mobile-nav .label {
     opacity: 0.8;
-    transition: opacity 0.25s ease, color 0.25s ease;
+    transition: opacity 0.25s ease, color 0.25s ease, text-shadow 0.25s ease;
   }
 
   .mobile-nav li.selected .label,
   .mobile-nav button:hover .label {
     opacity: 1;
     color: var(--main-accent);
+    filter: brightness(1.15);
+    text-shadow: 0 0 10px var(--main-accent), 0 0 50px var(--main-accent);
   }
 
   .mobile-nav li.selected .icon-container svg,
   .mobile-nav button:hover .icon-container svg {
     fill: var(--main-accent);
+    filter: brightness(1.15) drop-shadow(0 0 10px var(--main-accent)) drop-shadow(0 0 50px var(--main-accent));
   }
 
-  .mobile-nav li.selected .icon-container,
-  .mobile-nav button:hover .icon-container {
-    transform: translateY(-2px);
+  .mobile-nav li.selected .icon-container {
+    transform: scale(1.1);
+    background: rgba(141, 163, 185, 0.12);
   }
 
-  .mobile-nav li.selected button {
-    transform: translateY(-1px);
+  .mobile-nav li.selected .icon-container svg {
+    filter: brightness(1.25);
   }
 
   @media (max-width: 768px) {
