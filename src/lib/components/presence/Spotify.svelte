@@ -1,963 +1,631 @@
 <script lang="ts">
-	import { onMount, onDestroy } from 'svelte';
-	import { fly } from 'svelte/transition';
-	import { flip } from 'svelte/animate';
+  import type { Track } from '$lib/presence/lastfm';
+  import { fade, slide } from 'svelte/transition';
 
-	export interface Spotify {
-		track_id: string;
-		timestamps: { start: number; end: number };
-		song: string;
-		artist: string;
-		album_art_url: string;
-		album: string;
-	}
+  export let nowPlaying: Track | null = null;
+  export let lastPlayed: Track | null = null;
 
-	interface LyricLine {
-		time: number;
-		text: string;
-	}
+  $: active = nowPlaying || lastPlayed;
+  $: isCurrentlyPlaying = nowPlaying?.id === active?.id;
+  $: isLoading = !nowPlaying && !lastPlayed;
+  
+  // Track when data becomes available for transition
+  let hasLoaded = false;
+  $: if (active && !hasLoaded) {
+    hasLoaded = true;
+  }
 
-	export let data: Spotify | null = null;
-	export let isPlaying = false;
-	export let lastPlayed: Spotify | null = null;
+  function formatLastPlayedTime(timestamp: number | undefined): string {
+    if (!timestamp) return '';
+    const now = Date.now();
+    const diff = now - timestamp;
 
-	// Component state
-	let currentTrackId = '';
-	let lyrics: LyricLine[] = [];
-	let fetchingLyrics = false;
-	let isScrolling = false;
-	let scrollContainerElement: HTMLDivElement;
-	let animationFrameId: number;
-	let spotifyProgress = 0;
-	
-	// For syncing
-	let currentTimeMs = 0;
-	let currentLyricIndex = -1;
-	let visibleLyrics: LyricLine[] = [];
+    const minutes = Math.floor(diff / 60000);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
 
-	// Section visibility
-	let nowPlayingVisible = true;
-	let lyricsVisible = false;
-	
-	// Section tracking
-	let sectionTitles: { [key: string]: boolean } = {
-		'now-playing': true,
-		'lyrics': false
-	};
-
-	// Derived values
-	$: spotifyActivity = isPlaying && data ? data.song : (lastPlayed ? lastPlayed.song : 'Not Playing');
-	$: spotifyDetails = isPlaying && data ? 'by ' + data.artist?.replace(/;/g, ',') : (lastPlayed ? 'by ' + lastPlayed.artist?.replace(/;/g, ',') : 'No recent tracks');
-	$: spotifyState = isPlaying && data ? (data.album ? 'on ' + data.album : '') : (lastPlayed && lastPlayed.album ? 'on ' + lastPlayed.album : '');
-	$: spotifyImage = isPlaying && data ? data.album_art_url : (lastPlayed ? lastPlayed.album_art_url : 'default.webp');
-	$: spotifySongLink = isPlaying && data ? `https://open.spotify.com/track/${data.track_id}` : '';
-
-	// Helper functions
-	function parseLRC(lrcText: string): LyricLine[] {
-		if (!lrcText) return [];
-
-		const lines = lrcText.split('\n');
-		const parsed: LyricLine[] = [];
-
-		for (const line of lines) {
-			const match = line.match(/\[(\d+):(\d+)\.(\d+)\](.*)/);
-			if (match) {
-				const minutes = parseInt(match[1]);
-				const seconds = parseInt(match[2]);
-				const centiseconds = parseInt(match[3]);
-				const text = match[4].trim();
-
-				if (text) { // Only add non-empty lines
-					const timeInMs = (minutes * 60 + seconds) * 1000 + centiseconds * 10;
-					parsed.push({ time: timeInMs, text });
-				}
-			}
-		}
-
-		return parsed.sort((a, b) => a.time - b.time);
-	}
-
-	async function fetchLyrics(artist: string, song: string, album: string, trackId: string) {
-		if (fetchingLyrics || trackId === currentTrackId) return;
-
-		fetchingLyrics = true;
-		currentTrackId = trackId;
-		lyrics = [];
-		currentLyricIndex = -1;
-		visibleLyrics = [];
-		
-		// Reset scroll
-		if (scrollContainerElement) {
-			scrollContainerElement.scrollTop = 0;
-			nowPlayingVisible = true;
-			lyricsVisible = false;
-			sectionTitles = {
-				'now-playing': true,
-				'lyrics': false
-			};
-		}
-
-		try {
-			const cleanArtist = artist.replace(/;/g, ',').trim();
-			const cleanSong = song.trim();
-			const cleanAlbum = album ? album.trim() : '';
-			
-			const params = new URLSearchParams({
-				artist_name: cleanArtist,
-				track_name: cleanSong,
-				...(cleanAlbum && { album_name: cleanAlbum })
-			});
-			
-			const lrclibUrl = `https://lrclib.net/api/get?${params}`;
-			
-			const response = await fetch(lrclibUrl, {
-				headers: {
-					'Accept': 'application/json',
-				}
-			});
-
-			if (response.ok) {
-				const data = await response.json();
-				
-				if (data.syncedLyrics) {
-					lyrics = parseLRC(data.syncedLyrics);
-					// Show first 3 lyrics initially
-					if (lyrics.length > 0) {
-						visibleLyrics = lyrics.slice(0, Math.min(3, lyrics.length));
-					}
-				} else if (data.plainLyrics) {
-					lyrics = [{ time: 0, text: data.plainLyrics }];
-					visibleLyrics = lyrics;
-				}
-			}
-		} catch (error) {
-			console.error('Failed to fetch lyrics:', error);
-		} finally {
-			fetchingLyrics = false;
-		}
-	}
-
-	function syncLyrics(currentTimeMs: number) {
-		if (lyrics.length === 0) return;
-		
-		let newIndex = -1;
-		
-		// Find the current lyric (the one that should be active)
-		for (let i = 0; i < lyrics.length; i++) {
-			if (currentTimeMs >= lyrics[i].time) {
-				newIndex = i;
-			} else {
-				break;
-			}
-		}
-		
-		if (newIndex !== currentLyricIndex) {
-			currentLyricIndex = newIndex;
-			
-			// Update visible lyrics (show current line with context)
-			if (newIndex >= 0) {
-				const start = Math.max(0, newIndex - 1);
-				const end = Math.min(lyrics.length, start + 3);
-				visibleLyrics = lyrics.slice(start, end);
-			} else if (lyrics.length > 0) {
-				// Show first 3 lines if no current lyric yet
-				visibleLyrics = lyrics.slice(0, Math.min(3, lyrics.length));
-			}
-		}
-	}
-
-	function musicProgress(spotify: Spotify) {
-		const now = Date.now();
-		const total = spotify.timestamps.end - spotify.timestamps.start;
-		currentTimeMs = now - spotify.timestamps.start;
-
-		if (total > 0) {
-			spotifyProgress = Math.min(100, Math.max(0, (currentTimeMs / total) * 100));
-			syncLyrics(currentTimeMs);
-		}
-	}
-
-	function formatLastPlayedTime(timestamp: number): string {
-		const now = Date.now();
-		const diff = now - timestamp;
-		const minutes = Math.floor(diff / 60000);
-		const hours = Math.floor(minutes / 60);
-		const days = Math.floor(hours / 24);
-
-		if (days > 0) {
-			return `${days} day${days > 1 ? 's' : ''} ago`;
-		} else if (hours > 0) {
-			return `${hours} hour${hours > 1 ? 's' : ''} ago`;
-		} else if (minutes > 0) {
-			return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
-		} else {
-			return 'Just now';
-		}
-	}
-
-	function handleScroll(event: Event) {
-		if (!scrollContainerElement || isScrolling) return;
-
-		const container = scrollContainerElement;
-		const scrollTop = container.scrollTop;
-		const containerHeight = container.clientHeight;
-
-		// Determine which section is visible
-		const scrollMiddle = scrollTop + containerHeight / 2;
-		const sectionHeight = containerHeight;
-		
-		if (scrollMiddle < sectionHeight) {
-			// Now Playing section is visible
-			nowPlayingVisible = true;
-			lyricsVisible = false;
-			sectionTitles['now-playing'] = true;
-			sectionTitles['lyrics'] = false;
-		} else {
-			// Lyrics section is visible
-			nowPlayingVisible = false;
-			lyricsVisible = true;
-			sectionTitles['now-playing'] = false;
-			sectionTitles['lyrics'] = true;
-		}
-	}
-
-	function cleanupAnimation() {
-		if (animationFrameId) {
-			cancelAnimationFrame(animationFrameId);
-			animationFrameId = undefined;
-		}
-	}
-
-	function startProgressAnimation() {
-		if (!data || !isPlaying) return;
-		
-		cleanupAnimation();
-		
-		function spotifyTick() {
-			if (data && isPlaying) {
-				musicProgress(data);
-				animationFrameId = requestAnimationFrame(spotifyTick);
-			} else {
-				cleanupAnimation();
-			}
-		}
-		
-		spotifyTick();
-	}
-
-	function scrollToSection(section: 'now-playing' | 'lyrics') {
-		if (!scrollContainerElement) return;
-		
-		isScrolling = true;
-		
-		if (section === 'now-playing') {
-			scrollContainerElement.scrollTo({
-				top: 0,
-				behavior: 'smooth'
-			});
-		} else {
-			scrollContainerElement.scrollTo({
-				top: scrollContainerElement.clientHeight,
-				behavior: 'smooth'
-			});
-		}
-		
-		setTimeout(() => isScrolling = false, 350);
-	}
-
-	// Watch for changes in data or isPlaying
-	$: {
-		if (isPlaying && data) {
-			if (data.track_id && data.track_id !== currentTrackId) {
-				fetchLyrics(data.artist, data.song, data.album || '', data.track_id);
-			}
-			startProgressAnimation();
-		} else if (lastPlayed) {
-			spotifyProgress = 100;
-			lyrics = [];
-			currentLyricIndex = -1;
-			visibleLyrics = [];
-			if (scrollContainerElement) scrollContainerElement.scrollTop = 0;
-			cleanupAnimation();
-		} else {
-			spotifyProgress = 0;
-			lyrics = [];
-			currentLyricIndex = -1;
-			visibleLyrics = [];
-			if (scrollContainerElement) scrollContainerElement.scrollTop = 0;
-			cleanupAnimation();
-		}
-	}
-
-	onMount(() => {
-		if (scrollContainerElement) {
-			scrollContainerElement.scrollTop = 0;
-		}
-	});
-
-	onDestroy(() => {
-		cleanupAnimation();
-	});
+    if (days > 0) return `${days} day${days > 1 ? 's' : ''} ago`;
+    if (hours > 0) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+    if (minutes > 0) return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
+    return 'Just now';
+  }
 </script>
 
-<div class="rpc-box spotify-box">
-	<div class="spotify-scrollable"
-		 on:scroll|passive={handleScroll}
-		 bind:this={scrollContainerElement}>
-		
-		<div class="sticky-titles" aria-hidden="true">
-			<div class="sticky-title {sectionTitles['now-playing'] ? 'visible' : ''}">
-				<h3>Now Playing</h3>
-			</div>
-			<div class="sticky-title {sectionTitles['lyrics'] ? 'visible' : ''}">
-				<h3>Lyrics</h3>
-			</div>
-		</div>
-		
-		<div class="scroll-indicator" aria-hidden="true">
-			<div class="scroll-track" role="presentation">
-				<div class="scroll-circle scroll-top {sectionTitles['now-playing'] ? 'active' : ''}" 
-					 on:click={() => scrollToSection('now-playing')}
-					 title="Scroll to Now Playing"></div>
-				
-				<div class="scroll-line" aria-hidden="true"></div>
-				
-				<div class="scroll-circle scroll-bottom {sectionTitles['lyrics'] ? 'active' : ''}"
-					 on:click={() => scrollToSection('lyrics')}
-					 title="Scroll to Lyrics"></div>
-			</div>
-		</div>
+<div class="spotify-container">
+  {#if isLoading}
+    <!-- Skeleton -->
+    <div class="music-card skeleton" transition:fade={{ duration: 300 }}>
+      <div class="music-content">
+        <div class="album-section">
+          <div class="album-cover skeleton-box" />
+        </div>
 
-		<div class="sections-container">
-			<section class="now-playing-section {nowPlayingVisible ? 'active' : ''}">
-				<div class="section-content">
-					<div class="now-playing-container">
-						<div class="rpc-images">
-							{#if spotifyImage}
-								<img
-									src={spotifyImage}
-									alt={spotifyActivity}
-									class="big"
-									style="border-radius: 50%;"
-									on:error={(e) => {
-										const target = e.target as HTMLImageElement;
-										target.src = 'default.webp';
-									}}
-								/>
-							{/if}
-						</div>
+        <div class="track-info-wrapper skeleton-wrapper">
+          <div class="track-info">
+            <div class="track-title-group">
+              <div class="skeleton-line title" />
+              <div class="skeleton-line artist" />
+            </div>
+            
+            <div class="album-group">
+              <div class="skeleton-line album" />
+            </div>
+            
+            <div class="timestamp-group">
+              <div class="skeleton-line time" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  {/if}
 
-						<div class="rpc-text">
-							{#if isPlaying && spotifySongLink}
-								<a href={spotifySongLink} target="_blank" rel="noreferrer" class="song-link">
-									<h3 class="song-title">{spotifyActivity || 'Unknown Song'}</h3>
-								</a>
-							{:else if spotifyActivity === 'Not Playing'}
-								<h3 class="song-title">Not Playing</h3>
-							{:else}
-								<h3 class="song-title last-played">
-									{spotifyActivity || 'Unknown Song'}
-								</h3>
-							{/if}
+  {#if !isLoading && active}
+    <!-- Real content with smooth fade-in -->
+    <div class="music-card" 
+         class:fade-in={hasLoaded}
+         in:slide={{ duration: 400, delay: 50 }}
+         out:fade={{ duration: 200 }}>
+      {#if isCurrentlyPlaying}
+        <div class="visualizer">
+          {#each Array(16) as _, i}
+            <div class="visualizer-bar" style="animation-delay: {i * 0.12}s" />
+          {/each}
+        </div>
+      {/if}
 
-							{#if spotifyDetails}
-								<h5 class="details">{spotifyDetails}</h5>
-							{/if}
+      <div class="music-content">
+        <div class="album-section">
+          <div class="album-cover">
+            <img
+              src={active.image}
+              alt={`${active.title} by ${active.artist}`}
+              loading="lazy"
+              on:error={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.style.display = 'none';
+                target.nextElementSibling?.classList.remove('hidden');
+              }}
+            />
+            <div class="album-placeholder hidden">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+                <path d="M8 6a2 2 0 1 0 0 4 2 2 0 0 0 0-4m0 3a1 1 0 1 1 0-2 1 1 0 0 1 0 2"/>
+              </svg>
+            </div>
+          </div>
+        </div>
 
-							{#if spotifyState}
-								<h5 class="state">{spotifyState}</h5>
-							{/if}
-
-							{#if spotifyProgress > 0}
-								<div class="progress-container">
-									<progress
-										max="100"
-										value={spotifyProgress}
-										class={isPlaying ? 'playing' : 'last-played'}
-									/>
-									{#if !isPlaying && lastPlayed}
-										<p class="last-played-label">
-											Last Played {formatLastPlayedTime(JSON.parse(localStorage.getItem('lastPlayedSpotify') || '{"last_played":0}').last_played || Date.now())}
-										</p>
-									{/if}
-								</div>
-							{/if}
-						</div>
-					</div>
-				</div>
-			</section>
-
-			<section class="lyrics-section {lyricsVisible ? 'active' : ''}">
-				<div class="section-content">
-					{#if fetchingLyrics}
-						<div class="loading-lyrics">
-							<p>Loading lyrics...</p>
-						</div>
-					{:else if visibleLyrics.length > 0 && isPlaying}
-						<div class="lyrics-container">
-							{#each visibleLyrics as lyric (lyric.time)}
-								<div class="lyric-line-wrapper" animate:flip>
-									<p
-										class="lyric-line"
-										class:current={lyrics[currentLyricIndex] && lyric.time === lyrics[currentLyricIndex].time}
-										class:past={currentLyricIndex >= 0 && lyric.time < lyrics[currentLyricIndex].time}
-										class:future={currentLyricIndex >= 0 && lyric.time > lyrics[currentLyricIndex].time}
-									>
-										{lyric.text || '♪'}
-									</p>
-								</div>
-							{/each}
-						</div>
-					{:else if isPlaying && data}
-						<div class="no-lyrics">
-							<p>No lyrics available for this song</p>
-						</div>
-					{:else}
-						<div class="no-lyrics">
-							<p>No song is currently playing :c</p>
-						</div>
-					{/if}
-				</div>
-			</section>
-		</div>
-	</div>
+        <div class="track-info-wrapper">
+          <div class="track-info">
+            <div class="track-title-group">
+              <h3 class="track-title">{active.title}</h3>
+              <p class="artist">{active.artist}</p>
+            </div>
+            
+            <div class="album-group">
+              {#if active.album}
+                <p class="album">on {active.album}</p>
+              {/if}
+            </div>
+            
+            <div class="timestamp-group">
+              <p class="timestamp">
+                {#if isCurrentlyPlaying}
+                  <span class="now-playing">
+                    now playing on
+                    <svg class="spotify-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+                      <path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0m3.669 11.538a.5.5 0 0 1-.686.165c-1.879-1.147-4.243-1.407-7.028-.77a.499.499 0 0 1-.222-.973c3.048-.696 5.662-.397 7.77.892a.5.5 0 0 1 .166.686m.979-2.178a.624.624 0 0 1-.858.205c-2.15-1.321-5.428-1.704-7.972-.932a.625.625 0 0 1-.362-1.194c2.905-.881 6.517-.454 8.986 1.063a.624.624 0 0 1 .206.858m.084-2.268C10.154 5.56 5.9 5.419 3.438 6.166a.748.748 0 1 1-.434-1.432c2.825-.857 7.523-.692 10.492 1.07a.747.747 0 1 1-.764 1.288"/>
+                    </svg>
+                  </span>
+                {:else if active.playedAt}
+                  last played {formatLastPlayedTime(active.playedAt)}
+                {/if}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  {/if}
 </div>
 
 <style lang="scss">
-	.rpc-box {
-		background: rgba(25, 25, 25, 1);
-		border-radius: 12px;
-		padding: 1rem;
+  @keyframes visualizerPulse {
+    0%, 100% { height: 15%; opacity: 0.2; }
+    50% { height: 100%; opacity: 0.5; }
+  }
 
-		&.spotify-box {
-			height: 180px !important;
-			min-height: 180px !important;
-			max-height: 180px !important;
-			overflow: hidden;
-			padding: 0;
-			position: relative;
-			box-sizing: border-box;
-			width: 100%;
-		}
-	}
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
 
-	.spotify-scrollable {
-		height: 100%;
-		overflow-y: auto;
-		scroll-behavior: smooth;
-		-webkit-overflow-scrolling: touch;
-		scrollbar-width: none;
-		scroll-snap-type: y mandatory;
-		scroll-snap-stop: always;
+  @keyframes fadeIn {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+  }
 
-		&::-webkit-scrollbar {
-			display: none;
-		}
-	}
+  @keyframes slideUpFadeIn {
+    0% { 
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    100% { 
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 
-	.sticky-titles {
-		position: absolute;
-		top: 0;
-		right: 0;
-		z-index: 20;
-		display: flex;
-		flex-direction: column;
-		align-items: flex-end;
-		padding: 0.75rem 0.5rem 0 0;
-		background: transparent;
-		pointer-events: none;
-		width: 100%;
-		box-sizing: border-box;
-		height: 100%;
-		
-		.sticky-title {
-			opacity: 0;
-			transform: translateY(-10px);
-			transition: all 0.25s ease;
-			pointer-events: none;
-			text-align: right;
-			margin-bottom: 0.25rem;
-			position: absolute;
-			top: 0.75rem;
-			right: 0.5rem;
-			
-			h3 {
-				margin: 0;
-				font-size: 0.9rem;
-				font-weight: 600;
-				color: #8DA3B9;
-				text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-				padding: 0.15rem 0.35rem;
-				background: rgba(25, 25, 25, 0.7);
-				border-radius: 4px;
-				backdrop-filter: blur(4px);
-			}
-			
-			&.visible {
-				opacity: 1;
-				transform: translateY(0);
-			}
-		}
-	}
+  @keyframes contentFadeIn {
+    0% { 
+      opacity: 0;
+    }
+    100% { 
+      opacity: 1;
+    }
+  }
 
-	.scroll-indicator {
-		position: absolute;
-		top: 0;
-		right: 0;
-		z-index: 40;
-		height: 100%;
-		width: 1.5rem;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		pointer-events: none;
-	}
+  .spotify-container {
+    width: 100%;
+    max-width: 420px;
+    margin: 0 auto;
+    height: 180px !important;
+    min-height: 180px !important;
+    max-height: 180px !important;
+    display: flex;
+    align-items: center;
+    position: relative;
+  }
 
-	.scroll-track {
-		position: relative;
-		height: 60px;
-		width: 2px;
-		background: rgba(141, 163, 185, 0.1);
-		border-radius: 1px;
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: space-between;
-		pointer-events: auto;
-	}
+  .music-card {
+    background: transparent;
+    border-radius: 12px;
+    padding: 16px;
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    position: absolute;
+    top: 0;
+    left: 0;
+    
+    &.fade-in {
+      .music-content {
+        animation: contentFadeIn 0.5s ease-out forwards;
+      }
+      
+      .album-cover img,
+      .album-placeholder {
+        animation: fadeIn 0.6s ease-out 0.2s both;
+      }
+      
+      .track-title {
+        animation: slideUpFadeIn 0.5s ease-out 0.1s both;
+      }
+      
+      .artist {
+        animation: slideUpFadeIn 0.5s ease-out 0.15s both;
+      }
+      
+      .album {
+        animation: slideUpFadeIn 0.5s ease-out 0.2s both;
+      }
+      
+      .timestamp {
+        animation: slideUpFadeIn 0.5s ease-out 0.25s both;
+      }
+    }
+  }
 
-	.scroll-circle {
-		width: 8px;
-		height: 8px;
-		border-radius: 50%;
-		background: rgba(141, 163, 185, 0.3);
-		transition: all 0.2s ease;
-		cursor: pointer;
-		position: relative;
-		z-index: 2;
-		
-		&:hover {
-			background: rgba(141, 163, 185, 0.6);
-			transform: scale(1.2);
-		}
-		
-		&.active {
-			background: #8DA3B9;
-			box-shadow: 0 0 8px rgba(141, 163, 185, 0.5);
-		}
-		
-		&.scroll-top {
-			order: 1;
-		}
-		
-		&.scroll-bottom {
-			order: 3;
-		}
-	}
+  .skeleton {
+    animation: fadeIn 0.3s ease forwards;
+  }
 
-	.scroll-line {
-		flex: 1;
-		width: 2px;
-		background: linear-gradient(180deg, transparent, rgba(141, 163, 185, 0.6), transparent);
-		order: 2;
-	}
+  .skeleton-box,
+  .skeleton-line {
+    background: linear-gradient(
+      90deg,
+      rgba(255,255,255,0.04),
+      rgba(255,255,255,0.12),
+      rgba(255,255,255,0.04)
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.4s ease infinite;
+    border-radius: 6px;
+  }
 
-	.sections-container {
-		height: 200%;
-		padding: 0;
-		margin: 0;
-	}
+  .skeleton-box {
+    width: 100px;
+    height: 100px;
+    opacity: 0.6;
+  }
 
-	.now-playing-section,
-	.lyrics-section {
-		height: 50%;
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		opacity: 0.3;
-		transform: scale(0.95);
-		transition: all 0.36s cubic-bezier(0.4, 0, 0.2, 1);
-		scroll-snap-align: start;
-		scroll-snap-stop: always;
-		
-		&.active {
-			opacity: 1;
-			transform: scale(1);
-		}
-		
-		.section-content {
-			padding: 0 1rem;
-			height: 100%;
-			display: flex;
-			flex-direction: column;
-			justify-content: center;
-			padding-top: 1rem;
-			padding-bottom: 1rem;
-		}
-	}
+  .skeleton-line {
+    display: block;
+    border-radius: 4px;
+    opacity: 0.6;
+  }
 
-	.now-playing-section {
-		.now-playing-container {
-			display: flex;
-			gap: 1rem;
-			align-items: center;
-			justify-content: flex-start;
-			width: 100%;
-			flex-wrap: wrap;
-			margin-top: 0;
-		}
+  .skeleton-wrapper {
+    flex: 1;
+    min-width: 0;
+    height: 100px; 
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    
+    .track-info {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      height: 100%;
+    }
+    
+    .track-title-group {
+      margin-bottom: auto;
+    }
+    
+    .album-group {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      height: 100%;
+      width: 100%;
+    }
+    
+    .timestamp-group {
+      margin-top: auto;
+    }
+  }
 
-		.rpc-images {
-			flex-shrink: 0;
-		}
+  .track-title-group .skeleton-line.title { 
+    width: 70%; 
+    height: 16px; 
+    margin-bottom: 6px; 
+  }
+  
+  .track-title-group .skeleton-line.artist { 
+    width: 50%; 
+    height: 14px; 
+    margin-bottom: 0;
+  }
+  
+  .album-group .skeleton-line.album { 
+    width: 60%; 
+    height: 12px; 
+    margin: 0;
+  }
+  
+  .timestamp-group .skeleton-line.time { 
+    width: 40%; 
+    height: 12px; 
+    margin-top: auto;
+  }
 
-		.big {
-			height: 100px;
-			width: 100px;
-			object-fit: cover;
-			user-select: none;
-			transition: all 0.3s ease;
-			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-		}
+  .visualizer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    padding: 0 4px;
+    opacity: 0.08;
+    z-index: 0;
+  }
 
-		.rpc-text {
-			flex: 1;
-			min-width: 0;
-			max-width: calc(100% - 120px);
-			text-align: left;
+  .visualizer-bar {
+    flex: 1;
+    margin: 0 1px;
+    background: linear-gradient(to top, #8C977D, transparent);
+    border-radius: 2px 2px 0 0;
+    animation: visualizerPulse 2s infinite ease-in-out;
+    transform-origin: bottom;
+  }
 
-			.song-title {
-				margin: 0 0 0.5rem 0;
-				font-size: 1.2rem;
-				font-weight: 600;
-				line-height: 1.3;
-				overflow: hidden;
-				text-overflow: ellipsis;
-				display: -webkit-box;
-				-webkit-line-clamp: 2;
-				-webkit-box-orient: vertical;
+  .music-content {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    width: 100%;
+  }
 
-				&.last-played {
-					opacity: 0.8;
-				}
-			}
+  .album-section {
+    flex-shrink: 0;
+    position: relative;
+  }
 
-			h5 {
-				margin: 0.25rem 0;
-				font-size: 0.9rem;
-				font-weight: 400;
-				opacity: 0.8;
-				line-height: 1.4;
-				overflow: hidden;
-				text-overflow: ellipsis;
-				white-space: nowrap;
+  .album-cover {
+    width: 100px;
+    height: 100px;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    transition: transform 0.3s ease;
+    
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
 
-				&.details {
-					font-weight: 500;
-				}
+  .music-card:hover .album-cover {
+    transform: scale(1.02);
+  }
 
-				&.state {
-					font-size: 0.85rem;
-					opacity: 0.7;
-				}
-			}
+  .album-placeholder {
+    width: 100%;
+    height: 100%;
+    background: var(--color-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--main-accent);
 
-			.progress-container {
-				margin-top: 0.5rem;
+    &.hidden {
+      display: none;
+    }
+  }
 
-				.last-played-label {
-					margin: 0.25rem 0 0 0;
-					font-size: 0.8rem;
-					font-weight: 400;
-					opacity: 0.6;
-					text-align: left;
-				}
-			}
+  .track-info-wrapper {
+    flex: 1;
+    min-width: 0;
+    height: 100px; 
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
 
-			progress {
-				width: 100%;
-				border-radius: 10rem;
-				height: 6px;
-				background-color: rgba(255, 255, 255, 0.1);
-				border: none;
-				overflow: hidden;
+  .track-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+  }
 
-				&::-webkit-progress-bar {
-					background-color: rgba(255, 255, 255, 0.1);
-					border-radius: 10rem;
-				}
+  .track-title-group {
+    margin-bottom: auto;
+  }
 
-				&.playing {
-					&::-webkit-progress-value {
-						background-color: #8C977D;
-						border-radius: 10rem;
-						transition: width 0.3s ease;
-					}
+  .album-group {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    height: 100%;
+    width: 100%;
+  }
 
-					&::-moz-progress-bar {
-						background-color: #8C977D;
-						border-radius: 10rem;
-					}
-				}
+  .timestamp-group {
+    margin-top: auto;
+  }
 
-				&.last-played {
-					&::-webkit-progress-value {
-						background-color: #252525;
-						border-radius: 10rem;
-					}
+  .track-title {
+    margin: 0 0 4px 0;
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: var(--color-fg);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.2;
+    letter-spacing: -0.2px;
+  }
 
-					&::-moz-progress-bar {
-						background-color: #252525;
-						border-radius: 10rem;
-					}
-				}
-			}
-		}
+  .artist {
+    margin: 0;
+    font-size: 0.9rem;
+    font-weight: 450;
+    color: var(--main-accent);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.3;
+    letter-spacing: 0.1px;
+  }
 
-		.song-link {
-			text-decoration: none;
-			color: inherit;
+  .album {
+    margin: 0;
+    font-size: 0.85rem;
+    font-weight: 400;
+    color: rgba(232, 227, 227, 0.6);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.4;
+    letter-spacing: 0.05px;
+    text-align: left;
+    width: 100%;
+  }
 
-			&:hover {
-				text-decoration: underline;
-				opacity: 0.9;
-			}
+  .timestamp {
+    margin: 0;
+    font-size: 0.8rem;
+    font-weight: 400;
+    color: var(--main-accent);
+    opacity: 0.85;
+    line-height: 1.3;
+    letter-spacing: 0.05px;
+  }
 
-			h3 {
-				color: inherit;
-				margin: 0;
-			}
-		}
-	}
+  .now-playing {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 450;
+    letter-spacing: 0.05px;
+  }
 
-	.lyrics-section {
-		.lyrics-container {
-			display: flex;
-			flex-direction: column;
-			align-items: center;
-			justify-content: center;
-			gap: 0.5rem;
-			height: 100%;
-			width: 100%;
-			padding-top: 0.5rem;
-		}
+  .spotify-icon {
+    color: #8C977D;
+    flex-shrink: 0;
+    opacity: 0.9;
+  }
 
-		.lyric-line-wrapper {
-			width: 100%;
-			text-align: center;
-			transition: all 0.3s ease;
-		}
+  @media (max-width: 768px) {
+    .spotify-container {
+      height: 160px !important;
+      min-height: 160px !important;
+      max-height: 160px !important;
+    }
 
-		.lyric-line {
-			margin: 0;
-			font-size: 0.95rem;
-			line-height: 1.5;
-			opacity: 0.4;
-			transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-			padding: 0.25rem 0;
-			transform-origin: center;
-			display: inline-block;
-			overflow: hidden;
-			text-overflow: ellipsis;
-			max-width: 100%;
-			
-			&.past {
-				opacity: 0.3;
-				transform: translateY(-8px) scale(0.95);
-			}
+    .music-card {
+      padding: 12px;
+      border-radius: 10px;
+    }
 
-			&.current {
-				opacity: 1;
-				color: #8DA3B9;
-				font-weight: 500;
-				font-size: 1.05rem;
-				text-shadow: 0 0 8px rgba(141, 163, 185, 0.3);
-				transform: translateY(0) scale(1);
-				padding: 0.5rem 0;
-				transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-			}
-			
-			&.future {
-				opacity: 0.4;
-				transform: translateY(8px) scale(0.95);
-			}
-		}
+    .skeleton-box {
+      width: 80px;
+      height: 80px;
+    }
 
-		.loading-lyrics,
-		.no-lyrics {
-			text-align: center;
-			opacity: 0.5;
-			font-size: 1.2rem;
-			padding: 1rem;
-			border-radius: 8px;
-			width: 100%;
-		}
-	}
+    .skeleton-wrapper {
+      height: 80px;
+    }
 
-	@media (max-width: 768px) {
-		.rpc-box.spotify-box {
-			height: 160px !important;
-			min-height: 160px !important;
-			max-height: 160px !important;
-		}
-		
-		.sections-container {
-			height: 200%;
-		}
-		
-		.now-playing-section,
-		.lyrics-section {
-			height: 50%;
-			
-			.section-content {
-				padding: 0 0.75rem;
-				padding-top: 0.75rem;
-			}
-		}
-		
-		.sticky-titles {
-			padding: 0.75rem 0.25rem 0 0;
-			
-			.sticky-title {
-				top: 0.75rem;
-				right: 0.25rem;
-				
-				h3 {
-					font-size: 0.8rem;
-					padding: 0.1rem 0.25rem;
-				}
-			}
-		}
-		
-		.scroll-indicator {
-			width: 1.25rem;
-		}
-		
-		.now-playing-section {
-			.now-playing-container {
-				gap: 0.75rem;
-				padding: 0.5rem 0;
-			}
+    .album-cover {
+      width: 80px;
+      height: 80px;
+      border-radius: 10px;
+    }
 
-			.big {
-				height: 80px;
-				width: 80px;
-			}
-			
-			.rpc-text {
-				max-width: calc(100% - 90px);
-				text-align: left;
-				
-				.song-title {
-					font-size: 1rem;
-					-webkit-line-clamp: 1;
-				}
-				
-				h5 {
-					font-size: 0.85rem;
-				}
-				
-				progress {
-					height: 5px;
-				}
-			}
-		}
-		
-		.lyrics-section {
-			.lyrics-container {
-				padding-top: 0.25rem;
-			}
-			
-			.lyric-line {
-				font-size: 0.9rem;
-				padding: 0.2rem 0;
-				
-				&.current {
-					font-size: 1rem;
-					padding: 0.3rem 0;
-				}
-			}
-		}
-	}
+    .track-info-wrapper {
+      height: 80px;
+    }
 
-	@media (max-width: 480px) {
-		.rpc-box.spotify-box {
-			height: 140px !important;
-			min-height: 140px !important;
-			max-height: 140px !important;
-		}
-		
-		.sticky-titles {
-			padding: 0.75rem 0.15rem 0 0;
-			
-			.sticky-title {
-				top: 0.75rem;
-				right: 0.15rem;
-				
-				h3 {
-					font-size: 0.75rem;
-					padding: 0.08rem 0.15rem;
-				}
-			}
-		}
-		
-		.scroll-indicator {
-			width: 1rem;
-			
-			.scroll-track {
-				height: 50px;
-			}
-			
-			.scroll-circle {
-				width: 6px;
-				height: 6px;
-			}
-		}
-		
-		.now-playing-section {
-			.now-playing-container {
-				gap: 0.5rem;
-			}
-			
-			.big {
-				height: 60px;
-				width: 60px;
-			}
-			
-			.rpc-text {
-				max-width: calc(100% - 70px);
-				text-align: left;
-				
-				.song-title {
-					font-size: 0.9rem;
-					margin-bottom: 0.25rem;
-				}
-				
-				h5 {
-					font-size: 0.8rem;
-					margin: 0.15rem 0;
-				}
-				
-				.progress-container {
-					margin-top: 0.25rem;
-				}
-			}
-		}
-		
-		.lyrics-section {
-			.lyric-line {
-				font-size: 0.85rem;
-				
-				&.current {
-					font-size: 0.9rem;
-				}
-			}
-			
-			.loading-lyrics,
-			.no-lyrics {
-				padding: 0.75rem;
-				font-size: 0.8rem;
-			}
-		}
-	}
+    .music-content {
+      gap: 14px;
+    }
+
+    .track-title {
+      font-size: 1rem;
+      margin-bottom: 3px;
+    }
+
+    .artist {
+      font-size: 0.85rem;
+    }
+
+    .album {
+      font-size: 0.8rem;
+    }
+
+    .timestamp {
+      font-size: 0.75rem;
+    }
+
+    .visualizer {
+      padding: 0 2px;
+    }
+
+    .visualizer-bar {
+      margin: 0 0.5px;
+    }
+
+    .spotify-icon {
+      width: 12px;
+      height: 12px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .spotify-container {
+      height: 140px !important;
+      min-height: 140px !important;
+      max-height: 140px !important;
+    }
+
+    .music-card {
+      padding: 10px;
+    }
+
+    .skeleton-box {
+      width: 60px;
+      height: 60px;
+    }
+
+    .skeleton-wrapper {
+      height: 60px;
+    }
+
+    .album-cover {
+      width: 60px;
+      height: 60px;
+      border-radius: 8px;
+    }
+
+    .track-info-wrapper {
+      height: 60px;
+    }
+
+    .music-content {
+      gap: 12px;
+    }
+
+    .track-title {
+      font-size: 0.95rem;
+      margin-bottom: 2px;
+    }
+
+    .artist {
+      font-size: 0.8rem;
+    }
+
+    .album {
+      font-size: 0.75rem;
+    }
+
+    .timestamp {
+      font-size: 0.7rem;
+    }
+  }
+
+  @media (max-width: 360px) {
+    .spotify-container {
+      height: 130px !important;
+      min-height: 130px !important;
+      max-height: 130px !important;
+    }
+
+    .music-card {
+      padding: 8px;
+    }
+
+    .skeleton-box {
+      width: 50px;
+      height: 50px;
+    }
+
+    .skeleton-wrapper {
+      height: 50px;
+    }
+
+    .album-cover {
+      width: 50px;
+      height: 50px;
+    }
+
+    .track-info-wrapper {
+      height: 50px;
+    }
+
+    .track-title {
+      font-size: 0.9rem;
+    }
+
+    .artist {
+      font-size: 0.75rem;
+    }
+
+    .album {
+      font-size: 0.7rem;
+    }
+  }
 </style>

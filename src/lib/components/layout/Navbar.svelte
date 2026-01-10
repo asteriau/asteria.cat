@@ -1,100 +1,145 @@
 <script lang="ts">
   import LightRays from '$lib/components/layout/LightRays.svelte';
-  import { onMount, afterUpdate } from 'svelte';
   import { page } from '$app/stores';
   import { goto } from '$app/navigation';
 
-  let navContainer: HTMLElement | null = null;
-  let navIndicator: HTMLDivElement | null = null;
+  type NavItem = {
+    path: string;
+    label: string;
+  };
+
+  const items: NavItem[] = [
+    { path: '/', label: 'home' },
+    { path: '/about', label: 'about' },
+    { path: '/contact', label: 'contact' },
+    { path: '/projects', label: 'projects' }
+  ];
 
   $: currentPath = $page.url.pathname;
 
   function navigate(event: Event, path: string) {
     event.preventDefault();
+    if (currentPath === path) return;
     goto(path);
   }
-
-  function updateIndicatorPosition() {
-    if (!navContainer || !navIndicator) return;
-
-    const activeLink = navContainer.querySelector('.nav-link.active') as HTMLElement | null;
-    if (!activeLink) return;
-
-    const linkRect = activeLink.getBoundingClientRect();
-    const containerRect = navContainer.getBoundingClientRect();
-    const relativeLeft = linkRect.left - containerRect.left;
-
-    navIndicator.style.width = `${linkRect.width}px`;
-    navIndicator.style.left = `${relativeLeft}px`;
-    navIndicator.style.bottom = '0';
-  }
-
-  onMount(() => {
-    navIndicator = document.createElement('div');
-    navIndicator.className = 'nav-indicator';
-    navContainer?.appendChild(navIndicator);
-
-    updateIndicatorPosition();
-    window.addEventListener('resize', updateIndicatorPosition);
-
-    return () => {
-      window.removeEventListener('resize', updateIndicatorPosition);
-      if (navIndicator && navIndicator.parentNode) {
-        navIndicator.parentNode.removeChild(navIndicator);
-      }
-    };
-  });
-
-  afterUpdate(() => {
-    updateIndicatorPosition();
-  });
 </script>
 
 <LightRays />
 
-<nav bind:this={navContainer} class="navbar">
-  <div class="nav-container">
-    <ul class="nav-menu">
+<nav class="navbar">
+  <ul class="nav-menu">
+    {#each items as item}
       <li>
-        <a
-          href="/"
+        <button
+          type="button"
           class="nav-link"
-          class:active={currentPath === '/'}
-          on:click={(e) => navigate(e, '/')}
+          class:active={currentPath === item.path}
+          on:click={(e) => navigate(e, item.path)}
         >
-          home
-        </a>
+          <span class="label">{item.label}</span>
+          <span class="underline"></span>
+        </button>
       </li>
-      <li>
-        <a
-          href="/about"
-          class="nav-link"
-          class:active={currentPath === '/about'}
-          on:click={(e) => navigate(e, '/about')}
-        >
-          about
-        </a>
-      </li>
-      <li>
-        <a
-          href="/projects"
-          class="nav-link"
-          class:active={currentPath === '/projects'}
-          on:click={(e) => navigate(e, '/projects')}
-        >
-          projects
-        </a>
-      </li>
-      <li>
-        <a
-          href="/contact"
-          class="nav-link"
-          class:active={currentPath === '/contact'}
-          on:click={(e) => navigate(e, '/contact')}
-        >
-          contact
-        </a>
-      </li>
-    </ul>
-  </div>
+    {/each}
+  </ul>
 </nav>
+
+<style>
+  .navbar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: var(--navbar-height);
+    background: rgba(21, 21, 21, 0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--color-border);
+    z-index: 110;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .nav-menu {
+    list-style: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    gap: 8px;
+  }
+
+  .nav-menu li {
+    height: 100%;
+    display: flex;
+    align-items: center;
+  }
+
+  .nav-link {
+    position: relative;
+    padding: 8px 20px;
+    border: none;
+    background: transparent;
+    color: var(--color-fg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 400;
+    letter-spacing: 0.02em;
+    text-transform: lowercase;
+    transition: color 0.3s ease;
+    font-family: var(--font-main);
+  }
+
+  .label {
+    opacity: 0.7;
+    transition: opacity 0.3s ease;
+  }
+
+  .nav-link:hover .label,
+  .nav-link.active .label {
+    opacity: 1;
+  }
+
+  .nav-link.active .label {
+    color: var(--main-accent);
+  }
+
+  .underline {
+    position: absolute;
+    bottom: -1px;
+    left: 50%;
+    transform: translateX(-50%) scaleX(0);
+    width: 24px;
+    height: 2px;
+    background: var(--main-accent);
+    border-radius: 1px;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    opacity: 0;
+  }
+
+  .nav-link.active .underline {
+    transform: translateX(-50%) scaleX(1);
+    opacity: 1;
+  }
+
+  .nav-link:hover .underline {
+    transform: translateX(-50%) scaleX(0.6);
+    opacity: 0.5;
+  }
+
+  .nav-link.active:hover .underline {
+    transform: translateX(-50%) scaleX(1);
+    opacity: 1;
+  }
+
+  @media (max-width: 768px) {
+    .navbar {
+      display: none;
+    }
+  }
+</style>

@@ -9,7 +9,6 @@
   import { fade } from 'svelte/transition';
   import { cubicInOut } from 'svelte/easing';
 
-  // Default meta, can be overridden per page later
   export let title = "asteria's website";
   export let description = "meow meow meow meow meow meow";
   export let canonicalUrl = "/";
@@ -17,6 +16,7 @@
 
   // Typing animation for document.title
   onMount(() => {
+
     const fullTitle = "asteria";
     let current = "";
     let index = 0;
