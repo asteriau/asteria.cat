@@ -3,7 +3,7 @@
   import languageColors from "$lib/colors.json";
 
   const REPOSITORIES = [
-    "https://api.github.com/repos/asteriau/asteria.moe",
+    "https://api.github.com/repos/asteriau/asteria.cat",
     "https://api.github.com/repos/asteriau/Whimsy",
     "https://api.github.com/repos/asteriau/dotfiles"
   ];
