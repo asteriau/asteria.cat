@@ -94,7 +94,7 @@
   }
 
   .bio-box {
-    background: rgba(21, 21, 21, 0.6);
+    background: rgba(21, 21, 21, 0.1);
     border: 1px solid var(--color-border);
     border-radius: 16px;
     backdrop-filter: blur(12px);
@@ -154,7 +154,7 @@
   }
 
   .rpc-card {
-    background: rgba(21, 21, 21, 0.6);
+    background: rgba(21, 21, 21, 0.1);
     border: 1px solid var(--color-border);
     border-radius: 16px;
     backdrop-filter: blur(12px);
