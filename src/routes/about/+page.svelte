@@ -95,7 +95,6 @@
 
   .bio-box {
     background: rgba(21, 21, 21, 0.1);
-    border: 1px solid var(--color-border);
     border-radius: 16px;
     backdrop-filter: blur(12px);
     padding: 28px 32px;
@@ -155,7 +154,6 @@
 
   .rpc-card {
     background: rgba(21, 21, 21, 0.1);
-    border: 1px solid var(--color-border);
     border-radius: 16px;
     backdrop-filter: blur(12px);
     padding: 24px;
