@@ -4,27 +4,33 @@
 	"version": "0.0.1",
 	"type": "module",
 	"scripts": {
-		"dev": "vite dev",
-		"build": "vite build",
-		"preview": "vite preview",
-		"prepare": "svelte-kit sync || echo ''",
-		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
-		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch"
-	},
-	"devDependencies": {
-		"@sveltejs/adapter-auto": "^7.0.0",
-		"@sveltejs/adapter-static": "^3.0.10",
-		"@sveltejs/kit": "^2.48.5",
-		"@sveltejs/vite-plugin-svelte": "^6.2.1",
-		"@types/three": "^0.181.0",
-		"sass-embedded": "^1.93.3",
-		"svelte": "^5.43.8",
-		"svelte-check": "^4.3.4",
-		"typescript": "^5.9.3",
-		"vite": "^7.2.2"
+		"dev": "next dev",
+		"build": "next build",
+		"start": "next start",
+		"lint": "next lint"
 	},
 	"dependencies": {
+		"@react-three/drei": "^9.114.0",
+		"@react-three/fiber": "^8.16.0",
+		"clsx": "^2.1.1",
+		"framer-motion": "^11.0.0",
+		"next": "^14.2.0",
 		"ogl": "^1.0.11",
-		"three": "^0.181.2"
+		"react": "^18.3.0",
+		"react-dom": "^18.3.0",
+		"tailwind-merge": "^3.4.0",
+		"three": "^0.181.0"
+	},
+	"devDependencies": {
+		"@types/node": "^20.14.0",
+		"@types/react": "^18.3.0",
+		"@types/react-dom": "^18.3.0",
+		"@types/three": "^0.181.0",
+		"autoprefixer": "^10.4.0",
+		"eslint": "^8.57.0",
+		"eslint-config-next": "^14.2.0",
+		"postcss": "^8.4.0",
+		"tailwindcss": "^3.4.0",
+		"typescript": "^5.9.3"
 	}
 }

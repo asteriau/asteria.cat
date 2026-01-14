@@ -1,1 +1,0 @@
-export const prerender = true; // do not remove this or this fuckass site won't compile
