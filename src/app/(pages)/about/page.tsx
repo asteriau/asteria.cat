@@ -12,6 +12,12 @@ import {
 
 const MotionCard = motion(Card)
 
+// Override cardItem to remove opacity/scale animation
+const cardItemNoPop = {
+  hidden: { opacity: 1, scale: 1 }, // keep fully visible from the start
+  show: { opacity: 1, scale: 1, transition: { staggerChildren: 0.1 } }, // only stagger children
+}
+
 export default function AboutPage() {
   return (
     <motion.section
@@ -75,7 +81,7 @@ export default function AboutPage() {
 
         <MotionCard
           className="mt-4 p-5 md:p-6 relative overflow-hidden"
-          variants={cardItem}
+          variants={cardItemNoPop} 
         >
           <RichPresence />
         </MotionCard>
@@ -83,3 +89,4 @@ export default function AboutPage() {
     </motion.section>
   )
 }
+
