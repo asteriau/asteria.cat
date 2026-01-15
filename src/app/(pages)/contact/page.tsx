@@ -30,10 +30,7 @@ export default function ContactPage() {
           variant="gradient"
         />
 
-        <motion.div
-          className="mt-6"
-          variants={listContainer}
-        >
+        <motion.div className="mt-6" variants={listContainer}>
           <motion.div
             className="contact-grid grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-5"
             variants={listContainer}
@@ -49,19 +46,15 @@ export default function ContactPage() {
                   <Card
                     variant="contact"
                     className="
-                      p-5 md:p-6 
-                      flex items-center gap-4 
-                      min-h-[85px] 
-                      bg-bg/30 
-                      hover:bg-bg/40
+                      p-5 md:p-6
+                      flex items-center gap-4
+                      min-h-[85px]
+                      bg-elevated
+                      border border-border
+                      shadow-xl
                       transition-all duration-300
-                      border border-transparent
-                      hover:border-border/20
-                      group-hover:scale-[1.02]
-                      group-hover:shadow-xl
                     "
                   >
-
                     <div className="
                       flex-shrink-0 
                       w-12 h-12 

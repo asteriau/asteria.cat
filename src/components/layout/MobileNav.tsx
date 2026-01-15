@@ -46,7 +46,7 @@ export function MobileNav() {
 
   return (
     <>
-      <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-bg/95 backdrop-blur-md border-t border-border/60 h-16">
+      <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-elevated backdrop-blur-md border-t border-border/60 h-16">
         <div className="relative flex justify-center items-center h-full">
           <ul className="flex items-center gap-6 relative">
             <motion.div
@@ -122,7 +122,7 @@ export function MobileNav() {
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            className="fixed inset-0 z-40 bg-bg/95 backdrop-blur-xl md:hidden"
+            className="fixed inset-0 z-40 bg-elevated backdrop-blur-xl md:hidden"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}

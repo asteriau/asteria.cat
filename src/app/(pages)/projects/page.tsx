@@ -71,12 +71,9 @@ export default function ProjectsPage() {
                       p-5 md:p-6 
                       h-full 
                       flex flex-col 
-                      bg-bg/30 
-                      hover:bg-bg/40
-                      border border-transparent
-                      hover:border-border/20
-                      group-hover:scale-[1.02]
-                      group-hover:shadow-xl
+                      bg-elevated
+                      border border-border
+                      shadow-xl
                       transition-all duration-300
                       min-h-[160px]
                     "

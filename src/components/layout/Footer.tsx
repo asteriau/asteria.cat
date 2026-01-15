@@ -4,7 +4,7 @@ import Link from 'next/link'
 
 export function Footer() {
   return (
-    <footer className="relative z-10 flex flex-col items-center justify-center text-center py-6 px-4 bg-bg/20 backdrop-blur-xl text-fg text-sm gap-1">
+    <footer className="relative z-10 flex flex-col items-center justify-center text-center py-6 px-4 text-fg text-sm gap-1">
       <span className="text-fg/70">
         Made with <span className="text-accent">❤</span> by{' '}
         <span className="text-accent font-medium">asteria</span>

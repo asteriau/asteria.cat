@@ -40,13 +40,14 @@ export default function AboutPage() {
           className="
             mt-6
             space-y-3.5
-            bg-bg/30
-            backdrop-blur-xl
+            bg-elevated
             p-6 md:p-8
             rounded-lg
             text-[0.95rem] md:text-[1rem]
             leading-[1.75]
             text-fg/70
+            border border-border
+            shadow-xl
           "
           variants={cardItem}
         >

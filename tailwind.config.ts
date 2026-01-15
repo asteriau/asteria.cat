@@ -11,6 +11,7 @@ const config: Config = {
 			colors: {
 				bg: '#151515',
 				'bg-translucent': 'rgba(21, 21, 21, 0.88)',
+				elevated: '#181818',
 				fg: '#E8E3E3',
 				border: '#252525',
 				accent: '#8DA3B9',
