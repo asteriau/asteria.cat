@@ -1,11 +1,13 @@
 'use client'
 
+import { memo } from 'react'
 import { useActivity } from '@/hooks/useActivity'
 import { DISCORD_ID } from '@/lib/constants'
+import { Card } from '@/components/ui/Card'
 import { DiscordStatus } from './DiscordStatus'
 import { SpotifyStatus } from './SpotifyStatus'
 
-export function RichPresence() {
+function RichPresenceContent() {
 	const { discord, lastfm, loading } = useActivity(
 		DISCORD_ID,
 		process.env.NEXT_PUBLIC_LASTFM_API_KEY,
@@ -13,19 +15,26 @@ export function RichPresence() {
 	)
 
 	return (
-		<div className="flex flex-col w-full">
-			<div className="grid grid-cols-1 md:grid-cols-2 gap-0 w-full rounded-lg overflow-hidden p-6 md:p-8">
-				<div className="pl-0 pr-3 box-border border-r-0 md:border-r border-b md:border-b-0 border-border/60 pb-4 md:pb-0 mb-4 md:mb-0">
+		<div className="w-full flex flex-col md:flex-row gap-4 md:gap-3">
+			{/* Discord Activity Card */}
+			<div className="flex-1 min-w-0">
+				<Card className="h-full p-6 md:p-7">
 					<DiscordStatus presence={discord} loading={loading} />
-				</div>
-				<div className="px-3 box-border">
+				</Card>
+			</div>
+
+			{/* Spotify Status Card */}
+			<div className="flex-1 min-w-0">
+				<Card className="h-full p-6 md:p-7">
 					<SpotifyStatus
 						nowPlaying={lastfm.nowPlaying}
 						lastPlayed={lastfm.lastPlayed}
 						loading={loading}
 					/>
-				</div>
+				</Card>
 			</div>
 		</div>
 	)
 }
+
+export const RichPresence = memo(RichPresenceContent)

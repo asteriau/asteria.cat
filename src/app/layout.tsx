@@ -43,7 +43,7 @@ export default function RootLayout({
 		<html lang="en">
 			<body className={inter.variable}>
 				<PreloadProvider />
-				<LightRays raysOrigin="top-center" raysColor="#8DA3B9" />
+				<LightRays raysOrigin="top-center" raysColor="#ffffff" />
 				<Navbar />
 				<main>
 					{children}

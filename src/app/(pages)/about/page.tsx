@@ -65,19 +65,16 @@ export default function AboutPage() {
           </p>
         </motion.div>
 
-        <motion.div
-          className="w-16 h-px bg-border/60 mx-auto my-10 md:my-12"
-          variants={divider}
-        />
-
-        <SectionHeader
-          title="activity"
-          subtitle="what i'm up to right now"
-          as="h2"
-          size="lg"
-          variant="gradient"
-          align="center"
-        />
+        <div className="md:mt-8 mt-6">
+          <SectionHeader
+            title="activity"
+            subtitle="what i'm up to right now"
+            as="h2"
+            size="lg"
+            variant="gradient"
+            align="center"
+          />
+        </div>
 
         <MotionCard
           className="mt-4 p-5 md:p-6 relative overflow-hidden"

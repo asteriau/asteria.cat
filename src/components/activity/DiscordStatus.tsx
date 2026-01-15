@@ -41,7 +41,7 @@ export const DiscordStatus = memo(function DiscordStatus({ presence, loading }: 
 
 	if (loading || !presence) {
 		return (
-			<div className="w-full max-w-[420px] mx-auto h-[180px] min-h-[180px] max-h-[180px] flex items-center relative">
+			<div className="w-full h-[180px] min-h-[180px] max-h-[180px] flex items-center relative">
 				<div className="w-full h-full flex items-center absolute top-0 left-0">
 					<div className="flex gap-4 items-center w-full">
 						<Skeleton shimmer className="w-[100px] h-[100px] flex-shrink-0 rounded-full" />
@@ -64,7 +64,7 @@ export const DiscordStatus = memo(function DiscordStatus({ presence, loading }: 
 			: presence.status.charAt(0).toUpperCase() + presence.status.slice(1)
 
 	return (
-		<div className="w-full max-w-[420px] mx-auto h-[180px] min-h-[180px] max-h-[180px] flex items-center relative">
+		<div className="w-full h-[180px] min-h-[180px] max-h-[180px] flex items-center relative">
 			<div className={`w-full h-full flex items-center absolute top-0 left-0 transition-opacity duration-500 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
 				<div className="flex gap-4 items-center w-full relative z-[1]">
 					<div className="flex-shrink-0 relative">

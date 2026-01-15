@@ -12,28 +12,30 @@ interface SpotifyStatusProps {
 	loading?: boolean
 }
 
+function generateSeededBarHeights(isPlaying: boolean, trackId?: string): number[] {
+	if (!isPlaying) return []
+
+	const seed = trackId ? trackId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) : Math.random() * 1000
+	const heights: number[] = []
+
+	for (let i = 0; i < 16; i++) {
+		const pseudoRandom = Math.sin(seed + i * 0.1) * 10000
+		const normalized = pseudoRandom - Math.floor(pseudoRandom)
+		heights.push(15 + normalized * 85)
+	}
+
+	return heights
+}
+
 export const SpotifyStatus = memo(function SpotifyStatus({ nowPlaying, lastPlayed, loading }: SpotifyStatusProps) {
 	const active = nowPlaying || lastPlayed
-	const isCurrentlyPlaying = nowPlaying?.id === active?.id
+	const isCurrentlyPlaying = !!nowPlaying
 	const [isVisible, setIsVisible] = useState(false)
 
-	// Generate stable bar heights based on track ID to prevent re-renders
-	const barHeights = useMemo(() => {
-		if (!isCurrentlyPlaying) return []
-		
-		// Use track ID as seed for consistent heights per track
-		const seed = active?.id ? active.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) : Math.random() * 1000
-		const heights: number[] = []
-		
-		for (let i = 0; i < 16; i++) {
-			// Simple seeded random function
-			const pseudoRandom = Math.sin(seed + i * 0.1) * 10000
-			const normalized = pseudoRandom - Math.floor(pseudoRandom)
-			heights.push(15 + normalized * 85)
-		}
-		
-		return heights
-	}, [isCurrentlyPlaying, active?.id])
+	const barHeights = useMemo(
+		() => generateSeededBarHeights(isCurrentlyPlaying, active?.id),
+		[isCurrentlyPlaying, active?.id]
+	)
 
 	useEffect(() => {
 		if (!loading && active) {
@@ -46,8 +48,8 @@ export const SpotifyStatus = memo(function SpotifyStatus({ nowPlaying, lastPlaye
 	if (loading || !active) {
 		return (
 			<div className="w-full max-w-[420px] mx-auto h-[180px] min-h-[180px] max-h-[180px] flex items-center relative">
-				<div className="w-full h-full flex items-center absolute top-0 left-0">
-					<div className="flex gap-4 items-center w-full relative z-[1]">
+				<div className="w-full h-full flex items-center absolute top-0 left-0 z-[1]">
+					<div className="flex gap-4 items-center w-full relative">
 						<Skeleton shimmer className="w-[100px] h-[100px] flex-shrink-0 rounded-full" />
 						<div className="flex-1 min-w-0 flex flex-col gap-2">
 							<Skeleton shimmer className="w-[70%] h-4 skeleton-line" />
@@ -65,14 +67,15 @@ export const SpotifyStatus = memo(function SpotifyStatus({ nowPlaying, lastPlaye
 		<div className="w-full max-w-[420px] mx-auto h-[180px] min-h-[180px] max-h-[180px] flex items-center relative">
 			<div className={`w-full h-full flex items-center absolute top-0 left-0 transition-opacity duration-500 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
 				{isCurrentlyPlaying && (
-					<div className="absolute top-0 left-0 right-0 bottom-0 flex items-end justify-between px-1 opacity-[0.08] z-0">
+				<div className="absolute top-0 left-0 right-0 bottom-0 flex items-end gap-1 px-0 opacity-[0.08] z-0 -mb-6"
+ style={{ marginBottom: '-28px' }}>
 						{barHeights.map((height, i) => (
 							<div
 								key={i}
-								className="spotify-visualizer-bar flex-1 mx-0.5 bg-gradient-to-t from-[#8C977D] to-transparent rounded-t-sm"
+								className="spotify-visualizer-bar flex-1 bg-gradient-to-t from-[#8C977D] to-transparent rounded-t-sm"
 								style={{
-									animationDelay: `${i * 0.12}s`,
 									height: `${height}%`,
+									animationDelay: `-${i * 0.12}s`,
 								}}
 							/>
 						))}

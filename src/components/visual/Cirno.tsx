@@ -231,7 +231,7 @@ export function Cirno({
                 floatSpeed={floatSpeed}
               />
             </Suspense>
-            <OrbitControls enableZoom={false} enablePan={false} />
+            <OrbitControls enableZoom={false} enablePan={false} enableRotate={false} />
           </Canvas>
         )}
       </div>

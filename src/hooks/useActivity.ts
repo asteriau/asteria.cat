@@ -75,23 +75,16 @@ export function useActivity(
 
 		loadData()
 
-		// Only poll for changes after initial load
-		const discordInterval = setInterval(() => {
+		// Single unified polling interval for both Discord and Last.fm
+		const pollInterval = setInterval(() => {
 			if (initialLoadComplete && mounted) {
-				fetchDiscord()
+				Promise.all([fetchDiscord(), fetchLastfm()])
 			}
 		}, CACHE_DURATION.DISCORD)
-		
-		const lastfmInterval = setInterval(() => {
-			if (initialLoadComplete && mounted) {
-				fetchLastfm()
-			}
-		}, CACHE_DURATION.LASTFM)
 
 		return () => {
 			mounted = false
-			clearInterval(discordInterval)
-			clearInterval(lastfmInterval)
+			clearInterval(pollInterval)
 		}
 	}, [fetchDiscord, fetchLastfm])
 
