@@ -4,8 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { NAV_ITEMS } from '@/lib/constants'
 import { cn } from '@/lib/utils'
-import { motion, AnimatePresence } from 'framer-motion'
-import { useEffect, useState } from 'react'
+import { motion } from 'framer-motion'
 
 const icons = {
   home: (
@@ -32,132 +31,58 @@ const icons = {
 
 export function MobileNav() {
   const pathname = usePathname()
-  const [isOpen, setIsOpen] = useState(false)
-
-  useEffect(() => {
-    document.body.style.overflow = isOpen ? 'hidden' : ''
-    return () => {
-      document.body.style.overflow = ''
-    }
-  }, [isOpen])
 
   // Calculate the active index for the sliding pill
   const activeIndex = NAV_ITEMS.findIndex((item) => pathname === item.path)
 
   return (
-    <>
-      <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-elevated backdrop-blur-md border-t border-border/60 h-16">
-        <div className="relative flex justify-center items-center h-full">
-          <ul className="flex items-center gap-6 relative">
-            <motion.div
-              className="absolute left-0 w-12 h-12 flex items-center justify-center pointer-events-none"
-              animate={{ 
-                x: activeIndex * 72, // 12w + 6 gap = 72px per item
-                y: "calc(50% - 35px)" // This centers it vertically relative to the icon
-              }}
-              transition={{ 
-                type: "spring", 
-                stiffness: 400, 
-                damping: 30,
-                mass: 0.5 
-              }}
-            >
-              <div className="w-10 h-6 bg-[rgba(141,163,185,0.18)] rounded-[12px]" />
-            </motion.div>
-            
-            {NAV_ITEMS.map((item, idx) => {
-              const isActive = pathname === item.path
-              const iconKey = item.label as keyof typeof icons
-              return (
-                <li key={item.path} className="relative flex flex-col items-center justify-center w-12 h-12 gap-1">
-                  <Link href={item.path} className="flex flex-col items-center justify-center w-full h-full gap-1">
-                    <span
-                      className={cn(
-                        'transition-all duration-200 relative z-10',
-                        isActive ? 'text-accent opacity-100' : 'text-fg opacity-60'
-                      )}
-                    >
-                      {icons[iconKey]}
-                    </span>
-                    <span
-                      className={cn(
-                        'text-[12px] font-medium lowercase tracking-[0.035em] relative z-10',
-                        isActive ? 'text-accent opacity-100' : 'text-fg opacity-60'
-                      )}
-                    >
-                      {item.label}
-                    </span>
-                  </Link>
-                </li>
-              )
-            })}
-          </ul>
-
-          <button
-            aria-label="Toggle menu"
-            onClick={() => setIsOpen((v) => !v)}
-            className="absolute right-4 top-0 bottom-0 m-auto w-12 h-12 flex items-center justify-center"
-          >
-            <motion.div className="w-6 h-6 relative" animate={isOpen ? 'open' : 'closed'}>
-              <motion.span
-                className="absolute w-6 h-0.5 bg-fg rounded"
-                variants={{ closed: { rotate: 0, y: -6, opacity: 0.6 }, open: { rotate: 45, y: 0, opacity: 1 } }}
-                transition={{ duration: 0.2 }}
-              />
-              <motion.span
-                className="absolute w-6 h-0.5 bg-fg rounded"
-                variants={{ closed: { opacity: 0.6 }, open: { opacity: 0 } }}
-                transition={{ duration: 0.2 }}
-              />
-              <motion.span
-                className="absolute w-6 h-0.5 bg-fg rounded"
-                variants={{ closed: { rotate: 0, y: 6, opacity: 0.6 }, open: { rotate: -45, y: 0, opacity: 1 } }}
-                transition={{ duration: 0.2 }}
-              />
-            </motion.div>
-          </button>
-        </div>
-      </nav>
-
-      <AnimatePresence>
-        {isOpen && (
+    <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-elevated backdrop-blur-md border-t border-border/60 h-16">
+      <div className="relative flex justify-center items-center h-full">
+        <ul className="flex items-center gap-6 relative">
           <motion.div
-            className="fixed inset-0 z-40 bg-elevated backdrop-blur-xl md:hidden"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => setIsOpen(false)}
+            className="absolute left-0 w-12 h-12 flex items-center justify-center pointer-events-none"
+            animate={{ 
+              x: activeIndex * 72, // 12w + 6 gap = 72px per item
+              y: "calc(50% - 35px)" // centers vertically
+            }}
+            transition={{ 
+              type: "spring", 
+              stiffness: 400, 
+              damping: 30,
+              mass: 0.5 
+            }}
           >
-            <motion.div
-              className="h-full flex flex-col items-center justify-center gap-10 pb-24"
-              initial={{ y: 16, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: 16, opacity: 0 }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <span className="text-s  text-accent mb-2">asteria.cat</span>
-              {NAV_ITEMS.map((item) => {
-                const isActive = pathname === item.path
-                const iconKey = item.label as keyof typeof icons
-                return (
-                  <Link
-                    key={item.path}
-                    href={item.path}
-                    onClick={() => setIsOpen(false)}
+            <div className="w-10 h-6 bg-[rgba(141,163,185,0.18)] rounded-[12px]" />
+          </motion.div>
+
+          {NAV_ITEMS.map((item) => {
+            const isActive = pathname === item.path
+            const iconKey = item.label as keyof typeof icons
+            return (
+              <li key={item.path} className="relative flex flex-col items-center justify-center w-12 h-12 gap-1">
+                <Link href={item.path} className="flex flex-col items-center justify-center w-full h-full gap-1">
+                  <span
                     className={cn(
-                      'flex flex-col items-center gap-2 text-lg lowercase tracking-[0.05em]',
-                      isActive ? 'text-accent' : 'text-fg/70'
+                      'transition-all duration-200 relative z-10',
+                      isActive ? 'text-accent opacity-100' : 'text-fg opacity-60'
                     )}
                   >
                     {icons[iconKey]}
+                  </span>
+                  <span
+                    className={cn(
+                      'text-[12px] font-medium lowercase tracking-[0.035em] relative z-10',
+                      isActive ? 'text-accent opacity-100' : 'text-fg opacity-60'
+                    )}
+                  >
                     {item.label}
-                  </Link>
-                )
-              })}
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </>
+                  </span>
+                </Link>
+              </li>
+            )
+          })}
+        </ul>
+      </div>
+    </nav>
   )
 }
