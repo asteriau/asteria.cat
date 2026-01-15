@@ -13,7 +13,7 @@ export function Footer() {
       <span className="text-fg/70 flex flex-wrap items-center gap-2">
         Site licensed under
         <Link
-          href="https://github.com/khcrysalis/khcrysalis.dev?tab=GPL-3.0-1-ov-file"
+          href="https://github.com/asteriau/asteria.cat?tab=GPL-3.0-1-ov-file"
           target="_blank"
           rel="noopener noreferrer"
           className="text-accent"
