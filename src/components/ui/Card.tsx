@@ -15,7 +15,7 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(
           variant === 'default' &&
             'bg-[rgba(21,21,21,0.15)] border border-border/50 hover:border-[rgba(141,163,185,0.35)] hover:-translate-y-1 hover:shadow-[0_8px_24px_rgba(0,0,0,0.25)]',
           variant === 'contact' &&
-            'bg-[rgba(21,21,21,0.65)] hover:-translate-y-1 hover:shadow-[0_8px_24px_rgba(141,163,185,0.15)]',
+            'bg-[rgba(21,21,21,0.65)] hover:-translate-y-1', // lift stays, shadow removed
           variant === 'project' &&
             'bg-[rgba(21,21,21,0.65)] border border-border/60 hover:border-[rgba(141,163,185,0.3)] hover:-translate-y-1 hover:shadow-[0_8px_24px_rgba(0,0,0,0.25)]',
           className
