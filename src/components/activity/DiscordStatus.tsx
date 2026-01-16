@@ -65,10 +65,21 @@ export const DiscordStatus = memo(function DiscordStatus({ presence, loading }: 
 
 	return (
 		<div className="w-full h-[180px] min-h-[180px] max-h-[180px] flex items-center relative">
-			<div className={`w-full h-full flex items-center absolute top-0 left-0 transition-opacity duration-500 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
+			<div
+				className={`w-full h-full flex items-center absolute top-0 left-0 transition-opacity duration-500 ${
+					isVisible ? 'opacity-100' : 'opacity-0'
+				}`}
+			>
 				<div className="flex gap-4 items-center w-full relative z-[1]">
 					<div className="flex-shrink-0 relative">
-						<div className="w-[100px] h-[100px] relative">
+						<div
+							className="
+								relative
+								w-[72px] h-[72px]
+								sm:w-[88px] sm:h-[88px]
+								md:w-[100px] md:h-[100px]
+							"
+						>
 							{showActivity && presence.image ? (
 								<Image
 									src={presence.image}
@@ -84,22 +95,30 @@ export const DiscordStatus = memo(function DiscordStatus({ presence, loading }: 
 										fill
 										className="rounded-full object-cover shadow-[0_4px_20px_rgba(0,0,0,0.3)]"
 									/>
+
 									{presence.decoration && (
 										<Image
 											src={presence.decoration}
 											alt=""
 											fill
-											className="absolute -top-[6px] -left-[6px] w-[calc(100%+12px)] h-[calc(100%+12px)] pointer-events-none object-contain"
+											className="pointer-events-none object-contain scale-[1.24]"
 										/>
 									)}
 								</>
 							) : (
 								<div className="w-full h-full flex items-center justify-center bg-border rounded-xl text-accent shadow-[0_4px_20px_rgba(0,0,0,0.3)]">
-									<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="currentColor" viewBox="0 0 16 16">
+									<svg
+										xmlns="http://www.w3.org/2000/svg"
+										width="40"
+										height="40"
+										fill="currentColor"
+										viewBox="0 0 16 16"
+									>
 										<path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6m2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0m4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4m-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10s-3.516.68-4.168 1.332c-.678.678-.83 1.418-.832 1.664z" />
 									</svg>
 								</div>
 							)}
+
 							{showProfile && (
 								<div
 									className={`absolute bottom-1 right-1 w-5 h-5 rounded-full border-[3px] border-bg/40 z-[2] shadow-[0_2px_8px_rgba(0,0,0,0.2)] ${
@@ -138,6 +157,7 @@ export const DiscordStatus = memo(function DiscordStatus({ presence, loading }: 
 									presence.username || 'Discord User'
 								) : null}
 							</h3>
+
 							{showProfile && (
 								<p className="m-0 text-xs flex items-center gap-1">
 									<span
@@ -185,7 +205,13 @@ export const DiscordStatus = memo(function DiscordStatus({ presence, loading }: 
 
 						<p className="m-0 mt-1 flex items-center gap-1.5 text-xs font-medium text-[#d7bb87] whitespace-nowrap">
 							via Lanyard
-							<Image src="/lanyard.png" alt="Lanyard icon" width={14} height={14} className="flex-shrink-0 rounded-sm" />
+							<Image
+								src="/lanyard.png"
+								alt="Lanyard icon"
+								width={14}
+								height={14}
+								className="flex-shrink-0 rounded-sm"
+							/>
 						</p>
 					</div>
 				</div>
