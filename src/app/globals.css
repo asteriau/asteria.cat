@@ -34,7 +34,7 @@ select,
 textarea {
 	margin: 0;
 	padding: 0;
-	background: #151515;
+	background: #181818;
 	color: #E8E3E3;
 	font-family: var(--font-product-sans);
 	text-rendering: optimizeLegibility;
