@@ -21,7 +21,6 @@ export default function HomePage() {
         ref={containerRef}
         className="hero-wrapper min-h-screen flex justify-center items-center relative p-6 md:p-8"
       >
-        {/* Removed radial gradient background */}
 
         <div className="hero-container w-full max-w-[1200px] mx-auto flex flex-col md:grid md:grid-cols-2 gap-12 md:gap-16 items-center justify-center">
           
@@ -65,7 +64,6 @@ export default function HomePage() {
             </motion.div>
           </motion.div>
 
-          {/* Hero Model */}
           <motion.div
             className="model-wrapper w-full flex justify-center mt-8 md:mt-0"
             variants={heroModel}
@@ -73,7 +71,7 @@ export default function HomePage() {
             <Cirno
               modelUrl="/models/cirno.glb"
               scale={1}
-              rotationSpeed={0.75}
+              rotationSpeed={1.25}
               floatHeight={0.05}
               floatSpeed={2}
             />

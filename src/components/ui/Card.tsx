@@ -13,7 +13,7 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(
         className={cn(
           'rounded-xl transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)]',
           variant === 'default' &&
-            'hover:-translate-y-1 ',
+            'bg-elevated border border-border',
           variant === 'contact' &&
             'bg-[rgba(21,21,21,0.65)] hover:-translate-y-1', 
           variant === 'project' &&
