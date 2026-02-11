@@ -5,30 +5,27 @@ const nextConfig = {
   output: "export",
   pageExtensions: ["js", "jsx", "ts", "tsx", "mdx"],
   swcMinify: true,
+  
+  // Webpack configuration
   webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
+    // Add GLSL loader for shaders
     config.module.rules.push({
       test: /\.glsl$/,
       exclude: /node_modules/,
       use: ["raw-loader", "glslify-loader"],
     });
 
-    return {
-      ...config,
-      optimization: {
-        // Disabled due to build error with cssnano; re-enable when resolved.
-        minimize: false,
-      },
+    config.optimization = {
+      ...config.optimization,
+      minimize: false,
     };
+
+    return config;
   },
+
+  // You can add other experimental flags here if needed, but leave turbo off for now
   experimental: {
-    turbo: {
-      rules: {
-        "*.glsl": {
-          loaders: ["raw-loader"],
-          as: "*.js",
-        },
-      },
-    },
+    // turbo: removed, because Turbopack breaks GLSL loaders
   },
 };
 
