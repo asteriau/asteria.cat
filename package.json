@@ -4,7 +4,7 @@
   "scripts": {
     "dev": "NODE_OPTIONS='--inspect' next dev --webpack",
     "build": "next build --webpack",
-    "start": "next start",
+    "start": "next start --webpack",
     "build-docs": "contentlayer2 build"
   },
   "dependencies": {

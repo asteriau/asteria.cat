@@ -5,10 +5,8 @@ const nextConfig = {
   output: "export",
   pageExtensions: ["js", "jsx", "ts", "tsx", "mdx"],
   swcMinify: true,
-  
-  // Webpack configuration
-  webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
-    // Add GLSL loader for shaders
+
+  webpack: (config) => {
     config.module.rules.push({
       test: /\.glsl$/,
       exclude: /node_modules/,
@@ -23,10 +21,7 @@ const nextConfig = {
     return config;
   },
 
-  // You can add other experimental flags here if needed, but leave turbo off for now
-  experimental: {
-    // turbo: removed, because Turbopack breaks GLSL loaders
-  },
+  turbopack: {},
 };
 
 export default withContentlayer(nextConfig);
