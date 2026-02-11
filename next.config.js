@@ -1,27 +1,35 @@
+import { withContentlayer } from "next-contentlayer2";
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-	reactStrictMode: true,
-	images: {
-		domains: ['cdn.discordapp.com', 'i.scdn.co', 'lastfm.freetls.fastly.net', 'avatars.githubusercontent.com'],
-		remotePatterns: [
-			{
-				protocol: 'https',
-				hostname: 'cdn.discordapp.com',
-			},
-			{
-				protocol: 'https',
-				hostname: 'i.scdn.co',
-			},
-			{
-				protocol: 'https',
-				hostname: 'lastfm.freetls.fastly.net',
-			},
-			{
-				protocol: 'https',
-				hostname: 'avatars.githubusercontent.com',
-			},
-		],
-	},
-}
+  output: "export",
+  pageExtensions: ["js", "jsx", "ts", "tsx", "mdx"],
+  swcMinify: true,
+  webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
+    config.module.rules.push({
+      test: /\.glsl$/,
+      exclude: /node_modules/,
+      use: ["raw-loader", "glslify-loader"],
+    });
 
-export default nextConfig
+    return {
+      ...config,
+      optimization: {
+        // Disabled due to build error with cssnano; re-enable when resolved.
+        minimize: false,
+      },
+    };
+  },
+  experimental: {
+    turbo: {
+      rules: {
+        "*.glsl": {
+          loaders: ["raw-loader"],
+          as: "*.js",
+        },
+      },
+    },
+  },
+};
+
+export default withContentlayer(nextConfig);

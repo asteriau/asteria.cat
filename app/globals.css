@@ -1,0 +1,242 @@
+/* --- Tailwind & theme --- */
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@plugin "@tailwindcss/typography";
+@theme {
+    --font-sans: "Figtree";
+    --font-mono: "IBM Plex Mono";
+    --color-wisteria-50: oklch(0.955 0.012 314.384);
+    --color-wisteria-100: oklch(0.91 0.05 314.384);
+    --color-wisteria-200: oklch(0.82 0.1 314.384);
+    --color-wisteria-300: oklch(0.73 0.105 314.384);
+    --color-wisteria-400: oklch(0.64 0.12 314.384);
+    --color-wisteria-500: oklch(0.55 0.1 314.384);
+    --color-wisteria-600: oklch(0.445 0.084 314.384);
+    --color-wisteria-700: oklch(0.334 0.081 314.384);
+    --color-wisteria-800: oklch(0.223 0.078 314.384);
+    --color-wisteria-900: oklch(0.111 0.076 314.384);
+    --color-wisteria-950: oklch(0.056 0.074 314.384);
+}
+
+/* --- Base --- */
+html {
+    @apply bg-pink-100 dark:bg-black dark:text-slate-300 text-black transition-colors duration-75 -z-50;
+}
+
+/* --- Keyframes --- */
+@keyframes scrollText {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(calc(-1 * var(--text-width)));
+    }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInStaggered {
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* --- Animation utilities --- */
+.animate-scroll-text {
+    animation: scrollText;
+}
+
+.animate-page-in {
+    animation: fadeIn 0.35s ease-out both;
+}
+
+.animate-stagger-in {
+    animation: fadeInUp 0.4s ease-out both;
+}
+
+/* --- Prose reveal --- */
+.prose-reveal-item {
+    opacity: 0;
+    filter: blur(10px);
+    transform: translateY(24px);
+    transition:
+        opacity 0.65s ease-out,
+        filter 0.65s ease-out,
+        transform 0.65s ease-out;
+}
+
+.prose-reveal-item.prose-reveal-item--revealed {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateY(0);
+}
+
+/* --- Effects --- */
+.ambilight {
+    filter: url(#ambilight);
+}
+
+#gradient-canvas {
+    display: block;
+    width: 100vw;
+    height: 100vh;
+}
+
+/* --- Prose typography --- */
+.prose blockquote {
+    @apply ml-2 border-l-[1px] font-light border-slate-500 not-italic;
+}
+
+.prose a {
+    @apply dark:text-purple-300 text-blue-800 hover:text-blue-600 transition-all dark:decoration-slate-700 decoration-slate-300 decoration-1 underline-offset-2;
+}
+
+.a {
+    @apply dark:text-purple-300 text-blue-800 hover:text-blue-600 transition-all dark:decoration-slate-700 decoration-slate-300 decoration-1 underline-offset-2;
+}
+
+.prose p,
+.prose li {
+    @apply dark:text-gray-300 text-gray-800 mt-0;
+}
+
+.prose strong {
+    @apply font-medium;
+}
+
+.prose blockquote strong {
+    @apply font-semibold;
+}
+
+.prose h1,
+.prose h2,
+.prose h3,
+.prose h4,
+.prose h5,
+.prose h6 {
+    @apply font-medium mb-4;
+}
+
+/* --- Prose code --- */
+.prose pre,
+.prose code,
+pre,
+code,
+[data-rehype-pretty-code-fragment] {
+    font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
+}
+
+.prose pre {
+    @apply border-0 p-0 m-0 rounded-lg bg-transparent;
+    text-wrap: balance;
+}
+
+.prose figcaption + pre {
+    @apply rounded-t-none;
+}
+
+.prose figure code {
+    @apply px-4 py-3 border-2 border-neutral-100 dark:border-neutral-800;
+}
+
+.prose code {
+    @apply border-2 border-neutral-100 dark:border-neutral-800 rounded-md px-0.5;
+}
+
+.prose pre code {
+    border: initial;
+}
+
+pre {
+    --tw-shadow-color: #0e1d1dc0;
+    --tw-shadow: 0 2px 2px -0px rgb(0 0 0 / 0.1),
+        0 8px 10px -6px rgb(0 0 0 / 0.1);
+    --tw-shadow-colored: 0 2px 2px -0px var(--tw-shadow-color),
+        0 8px 10px -6px var(--tw-shadow-color);
+    box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000),
+        var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+
+    --tw-shadow: var(--tw-shadow-colored);
+    @apply shadow-neutral-400/50 dark:shadow-black/50;
+}
+
+/* --- Tables --- */
+table {
+    display: block;
+    max-width: fit-content;
+    overflow-x: auto;
+    white-space: nowrap;
+}
+
+/* --- Prose first-child --- */
+.prose > :first-child {
+    margin-top: 1.25em !important;
+    margin-bottom: 1.25em !important;
+}
+
+/* --- Rehype Pretty Code --- */
+[data-rehype-pretty-code-fragment] .line {
+    @apply py-2;
+}
+[data-rehype-pretty-code-fragment] [data-line-numbers] > .line::before {
+    counter-increment: line;
+    content: counter(line);
+    display: inline-block;
+    width: 1rem;
+    margin-right: 1rem;
+    text-align: right;
+    color: gray;
+}
+
+[data-rehype-pretty-code-fragment] .line-highlighted span {
+    @apply relative;
+}
+[data-rehype-pretty-code-fragment] .word--highlighted {
+    @apply rounded-md bg-slate-500/10 p-1;
+}
+[data-rehype-pretty-code-title] {
+    @apply px-4 py-3 font-mono text-xs font-medium border rounded-lg rounded-b-none dark:text-neutral-200 dark:border-[#333333] dark:bg-[#1c1c1c];
+}
+
+/* --- Shiki theme --- */
+code[data-theme*=" "],
+code[data-theme*=" "] span {
+    color: var(--shiki-light);
+    background-color: var(--shiki-light-bg);
+}
+
+:is(.dark code[data-theme*=" "], .dark code[data-theme*=" "] span) {
+    color: var(--shiki-dark);
+    background-color: var(--shiki-dark-bg);
+}
+
+.dark code[data-theme*=" "],
+.dark code[data-theme*=" "] span {
+    color: var(--shiki-dark);
+    background-color: var(--shiki-dark-bg);
+}
