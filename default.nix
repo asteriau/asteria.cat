@@ -3,7 +3,7 @@
 pkgs.mkShell {
   name = "asteria.cat";
 
-  buildInputs = [
+  buildInputs = [ # This literally exists just because i cba to install these globally
     pkgs.nodejs_20 
     pkgs.pnpm
   ];

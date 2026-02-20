@@ -11,13 +11,13 @@ export default function WeekliesPage() {
         <div className="flex flex-row gap-2 text-xl mb-4">
           <Link
             href="/blog"
-            className="bg-neutral-300 hover:bg-slate-400 dark:bg-neutral-700 dark:hover:bg-neutral-800 px-2 rounded-lg a"
+            className="bg-neutral-700 hover:bg-neutral-600 px-2 rounded-lg a transition-colors duration-200"
           >
             Main
           </Link>
           <Link
             href="/blog/weeklies"
-            className="bg-neutral-400 hover:bg-neutral-400 dark:bg-neutral-800 dark:hover:bg-neutral-800 px-2 rounded-lg a"
+            className="bg-neutral-800 hover:bg-neutral-700 px-2 rounded-lg a transition-colors duration-200"
           >
             Weeklies
           </Link>

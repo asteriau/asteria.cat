@@ -104,7 +104,7 @@ function TocThumb({
   return (
     <div
       ref={thumbRef}
-      className={`absolute -left-1 w-4 bg-wisteria-600 transition-all duration-200 dark:bg-wisteria-400 ${className}`}
+      className={`absolute -left-1 w-4 bg-paradise-300 transition-all duration-200 ${className}`}
       style={{
         top: "var(--fd-top, 0px)",
         height: "var(--fd-height, 0px)",
@@ -141,10 +141,10 @@ function TOCItem({
           e.preventDefault();
           onClick();
         }}
-        className={`relative block py-1.5 text-sm transition-colors hover:text-neutral-900 dark:hover:text-neutral-100 ${
+        className={`relative block py-1.5 text-sm transition-colors hover:text-neutral-100 ${
           isActive
-            ? "text-wisteria-800 dark:text-wisteria-300"
-            : "text-neutral-600 dark:text-neutral-400"
+            ? "text-paradise-300"
+            : "text-neutral-400"
         }`}
         style={{
           paddingLeft: `${getItemOffset(item.level)}px`,
@@ -489,7 +489,7 @@ useEffect(() => {
 
     return (
       <nav
-        className={`fixed top-0 right-0 left-0 z-40 border-b border-neutral-200 bg-pink-100/90 backdrop-blur-sm transition-transform duration-300 dark:border-neutral-700 dark:bg-neutral-900/90 ${
+        className={`fixed top-0 right-0 left-0 z-40 border-b border-neutral-700 bg-[#151515]/90 backdrop-blur-sm transition-transform duration-300 ${
           showSticky ? "translate-y-0" : "-translate-y-full"
         } ${className}`}
       >
@@ -497,13 +497,13 @@ useEffect(() => {
           <div className="relative">
             <button
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              className="flex w-full items-center justify-between p-3 text-left hover:bg-neutral-100/80 dark:hover:bg-neutral-800/80"
+              className="flex w-full items-center justify-between p-3 text-left hover:bg-neutral-800/80"
             >
               <div className="flex items-center space-x-2">
                 <svg className="h-4 w-4 text-neutral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                 </svg>
-                <span className="truncate text-sm font-medium text-neutral-900 dark:text-neutral-100">
+                <span className="truncate text-sm font-medium text-neutral-100">
                   {currentItem?.text || "Table of Contents"}
                 </span>
               </div>
@@ -518,7 +518,7 @@ useEffect(() => {
             </button>
 
             {isDropdownOpen && (
-              <div className="fixed top-0 right-0 left-0 max-h-screen overflow-y-auto border-b border-neutral-200 bg-pink-100 shadow-lg dark:border-neutral-700 dark:bg-neutral-900">
+              <div className="fixed top-0 right-0 left-0 max-h-screen overflow-y-auto border-b border-neutral-700 bg-[#151515] shadow-lg">
                 {toc.map((item) => (
                   <button
                     key={item.id}
@@ -526,10 +526,10 @@ useEffect(() => {
                       scrollToHeading(item.id);
                       setIsDropdownOpen(false);
                     }}
-                    className={`w-full px-4 py-2 text-left text-sm hover:bg-neutral-100 dark:hover:bg-neutral-800 ${
+                    className={`w-full px-4 py-2 text-left text-sm hover:bg-neutral-800 ${
                       activeItems.includes(item.id)
-                        ? "bg-wisteria-100 text-wisteria-700 dark:bg-wisteria-900/20 dark:text-wisteria-400"
-                        : "text-neutral-700 dark:text-neutral-300"
+                        ? "bg-paradise-900/20 text-paradise-300"
+                        : "text-neutral-300"
                     }`}
                     style={{ paddingLeft: `${12 + (item.level - 1) * 16}px` }}
                   >
@@ -547,10 +547,10 @@ useEffect(() => {
   return (
     <nav className={`table-of-contents ${className}`}>
       <div className="mb-3 flex items-center justify-between">
-        <h4 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">On this page</h4>
+        <h4 className="text-sm font-semibold text-neutral-100">On this page</h4>
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="rounded p-1 text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900 lg:hidden dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-100"
+          className="rounded p-1 text-neutral-400 hover:bg-neutral-800 hover:text-neutral-100 lg:hidden"
           aria-label={isCollapsed ? "Expand table of contents" : "Collapse table of contents"}
         >
           <svg className={`h-4 w-4 transition-transform duration-200 ${isCollapsed ? "rotate-0" : "rotate-180"}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -571,9 +571,9 @@ useEffect(() => {
               )}")`,
             }}
           >
-            <div className="h-full bg-neutral-300 dark:bg-neutral-600" />
+            <div className="h-full bg-neutral-600" />
 
-            <TocThumb containerRef={containerRef} activeItems={activeItems} className="bg-wisteria-500 dark:bg-wisteria-400" />
+            <TocThumb containerRef={containerRef} activeItems={activeItems} className="bg-paradise-300" />
           </div>
         )}
 

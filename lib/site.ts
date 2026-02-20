@@ -4,7 +4,7 @@ const baseUrl =
   process.env.NEXT_PUBLIC_SITE_URL ||
   (typeof siteconfig?.site === "string"
     ? `https://${siteconfig.site.replace(/^https?:\/\//, "")}`
-    : "https://blog.asteria.cat");
+    : "https://asteria.cat");
 
 export function getSiteUrl(): string {
   return baseUrl;

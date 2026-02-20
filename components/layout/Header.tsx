@@ -1,5 +1,3 @@
-import Link from "next/link";
-import { ColorToggle } from "@/components/ui/ColorToggle";
 import clsx from "clsx";
 import { HTMLAttributes } from "react";
 import HeaderLink from "./HeaderLink";
@@ -47,10 +45,10 @@ export default function Header(props: HTMLAttributes<HTMLDivElement>) {
         <div className="flex gap-2">
           <IconButton
             Icon={LuCommand}
-            className="hidden text-gray-500 bg-neutral-300 dark:text-gray-500 dark:bg-neutral-700"
+            className="hidden text-gray-500 bg-neutral-700"
             disabled
           />
-          <ColorToggle />
+
         </div>
       </div>
     </div>

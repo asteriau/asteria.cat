@@ -23,17 +23,17 @@ export default function PostCard({
       <h2 className="mb-1 text-xl">
         <Link
           href={post.url}
-          className="text-blue-700 hover:text-blue-300 dark:text-blue-400"
+          className="text-paradise-300 hover:text-paradise-200 transition-colors duration-200"
         >
           {post.title}
         </Link>
       </h2>
-      <div className="text-sm mb-2 dark:text-gray-100 text-gray-800">
+      <div className="text-sm mb-2 text-neutral-100">
         {format(parseISO(post.datePublished), "MMM. dd, yyyy")}{" "}
-        <span className="dark:text-gray-400 text-gray-700">
+        <span className="text-neutral-400">
           <TimeAgo date={post.datePublished} />
         </span>
-        <span className="text-sm mb-8 dark:text-gray-400 text-gray-700">
+        <span className="text-sm mb-8 text-neutral-400">
           {showLastUpdated && (
             <>
               {" • "}

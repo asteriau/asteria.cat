@@ -25,32 +25,32 @@ export default function ProfileCard() {
         </div>
 
         <div
-          className="text-2xl mt-2 text-wisteria-700 dark:text-wisteria-200 opacity-0 animate-[fadeIn_0.5s_ease-out_0.2s_forwards]"
+          className="text-2xl mt-2 text-paradise-200 opacity-0 animate-[fadeIn_0.5s_ease-out_0.2s_forwards]"
         >
           Hey, I'm <span className="font-semibold">Laura.</span>
         </div>
 
         <div
-          className="text-base dark:text-neutral-200 text-neutral-700 opacity-0 animate-[fadeIn_0.5s_ease-out_0.3s_forwards]"
+          className="text-base text-neutral-200 opacity-0 animate-[fadeIn_0.5s_ease-out_0.3s_forwards]"
         >
           Software & Web dev. Designer. Human being.
           <br />
-          <span className="text-sm dark:text-neutral-300 text-neutral-700">
+          <span className="text-sm text-neutral-300">
             insert interesting thing about me (there's none)
           </span>
         </div>
 
         <div
-          className="text-sm dark:text-neutral-300 text-neutral-700 opacity-0 animate-[fadeIn_0.5s_ease-out_0.4s_forwards] mb-3"
+          className="text-sm text-neutral-300 opacity-0 animate-[fadeIn_0.5s_ease-out_0.4s_forwards] mb-3"
         >
           inquiries? shoot me an email at contact@asteria.cat
         </div>
 
-        <div className="mt-2 flex gap-4 text-3xl text-neutral-700 dark:text-neutral-400">
+        <div className="mt-2 flex gap-4 text-3xl text-neutral-400">
           <Tooltip tip="GitHub">
             <Link href="https://github.com/asteriau" target="_blank">
               <FaGithub
-                className="hover:text-wisteria-700 dark:hover:text-wisteria-100 transition-colors opacity-0 animate-[fadeIn_0.5s_ease-out_forwards]"
+                className="hover:text-paradise-300 transition-colors opacity-0 animate-[fadeIn_0.5s_ease-out_forwards]"
                 style={{ animationDelay: "0.5s" }}
               />
             </Link>
@@ -59,7 +59,7 @@ export default function ProfileCard() {
           <Tooltip tip="Discord">
             <Link href="https://discord.com/users/444582693255249950" target="_blank">
               <FaDiscord
-                className="hover:text-wisteria-700 dark:hover:text-wisteria-100 transition-colors opacity-0 animate-[fadeIn_0.5s_ease-out_forwards]"
+                className="hover:text-paradise-300 transition-colors opacity-0 animate-[fadeIn_0.5s_ease-out_forwards]"
                 style={{ animationDelay: "0.55s" }}
               />
             </Link>
@@ -68,7 +68,7 @@ export default function ProfileCard() {
           <Tooltip tip="Telegram">
             <Link href="https://t.me/obregia" target="_blank">
               <FaTelegramPlane
-                className="hover:text-wisteria-700 dark:hover:text-wisteria-100 transition-colors opacity-0 animate-[fadeIn_0.5s_ease-out_forwards]"
+                className="hover:text-paradise-300 transition-colors opacity-0 animate-[fadeIn_0.5s_ease-out_forwards]"
                 style={{ animationDelay: "0.6s" }}
               />
             </Link>
@@ -77,7 +77,7 @@ export default function ProfileCard() {
           <Tooltip tip="Steam">
             <Link href="https://steamcommunity.com/id/asteriau" target="_blank">
               <FaSteam
-                className="hover:text-wisteria-700 dark:hover:text-wisteria-100 transition-colors opacity-0 animate-[fadeIn_0.5s_ease-out_forwards]"
+                className="hover:text-paradise-300 transition-colors opacity-0 animate-[fadeIn_0.5s_ease-out_forwards]"
                 style={{ animationDelay: "0.65s" }}
               />
             </Link>
@@ -86,7 +86,7 @@ export default function ProfileCard() {
           <Tooltip tip="Last.fm">
             <Link href="https://last.fm/user/asteriau" target="_blank">
               <FaLastfm
-                className="hover:text-wisteria-700 dark:hover:text-wisteria-100 transition-colors opacity-0 animate-[fadeIn_0.5s_ease-out_forwards]"
+                className="hover:text-paradise-300 transition-colors opacity-0 animate-[fadeIn_0.5s_ease-out_forwards]"
                 style={{ animationDelay: "0.7s" }}
               />
             </Link>

@@ -3,9 +3,9 @@ import type { Metadata, Viewport } from "next";
 import { IBM_Plex_Mono, Figtree, JetBrains_Mono } from "next/font/google";
 import { Providers } from "./providers";
 import Header from "@/components/layout/Header";
-import { Conditional } from "@/components/shader/conditional";
+import { Conditional } from "@/components/background/conditional";
 import { Suspense } from "react";
-import Gradient from "@/components/shader/gradient-importer";
+import GrainientLoader from "@/components/background/grainient-loader";
 
 export const metadata: Metadata = {
   title: "asteria.cat",
@@ -71,16 +71,16 @@ export default function RootLayout({
     >
       <body>
         <Providers>
-          <div className="dark:text-neutral-200 text-black transition-all h-screen overflow-x-hidden flex justify-center">
+          <div className="text-paradise-fg transition-all h-screen overflow-x-hidden flex justify-center">
             <div
-              className={`fixed left-0 top-0 w-screen h-screen bg-pink-100 dark:bg-neutral-900 transition-opacity duration-1000 -z-30`}
+              className={`fixed left-0 top-0 w-screen h-screen bg-paradise-bg transition-opacity duration-1000 -z-30`}
             />
             <Conditional
               paths={["/", "/projects", "/uses"]}
               defaultComponent={null}
             >
               <Suspense>
-                <Gradient />
+                <GrainientLoader />
               </Suspense>
             </Conditional>
             <div className="px-4 py-5 mx-2 mb-8 sm:px-6 max-w-full max-h-full md:max-w-screen-xl">

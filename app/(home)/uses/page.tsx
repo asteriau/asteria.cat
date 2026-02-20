@@ -5,17 +5,17 @@ import { LuClock } from "react-icons/lu";
 export default function UsesPage() {
   return (
     <div className="h-full w-screen max-w-full md:col-span-5 md:row-span-4 flex flex-col items-left justify-center md:grid md:grid-cols-2 gap-4 pb-16 animate-page-in">
-      <Card className="text-lg w-screen max-w-full dark:bg-neutral-900/10 flex flex-col items-left justify-between md:col-span-2">
+      <Card className="text-lg w-screen max-w-full bg-[#1E1E1E]/10 flex flex-col items-left justify-between md:col-span-2">
         <div className="p-4">
           <h1 className="text-4xl">/uses</h1>
 
-          <div className="mt-2 text-sm text-gray-600 dark:text-gray-300">
+          <div className="mt-2 text-sm text-neutral-300">
             Inspired by{" "}
             <a
               href="https://wesbos.com/uses"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-wisteria-500 dark:text-wisteria-300 underline"
+              className="a"
             >
               Wes Bos&apos; /uses
             </a>
@@ -24,14 +24,14 @@ export default function UsesPage() {
               href="https://uses.tech"
               target="_blank"
               rel="noopener noreferrer"
-              className="underline"
+              className="a"
             >
               /uses here
             </a>
             .
           </div>
 
-          <div className="mt-2 text-sm text-gray-600 dark:text-gray-300">
+          <div className="mt-2 text-sm text-neutral-300">
             <LuClock className="inline-block w-5 h-5 mr-2 mb-1" />
             <span>
               Last updated <TimeAgo date="2026-01-30" parentheses={false} />
@@ -51,17 +51,17 @@ export default function UsesPage() {
           </div>
 
           {/* Linux */}
-          <div className="my-6 h-px bg-wisteria-500/20 dark:bg-wisteria-300/10" />
+          <div className="my-6 h-px bg-paradise-300/10" />
 
           <h2 className="text-2xl mt-4 tracking-tight">Linux</h2>
-          <ul className="space-y-2 list-disc list-outside ml-4 dark:text-gray-200 mt-2 text-base">
+          <ul className="space-y-2 list-disc list-outside ml-4 text-neutral-200 mt-2 text-base">
             <li>
               I use{" "}
               <a
                 href="https://nixos.org"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-wisteria-500 dark:text-wisteria-300 underline"
+                className="a"
               >
                 NixOS
               </a>{" "}
@@ -73,7 +73,7 @@ export default function UsesPage() {
                 href="https://hyprland.org"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-wisteria-500 dark:text-wisteria-300 underline"
+                className="a"
               >
                 Hyprland
               </a>{" "}
@@ -82,7 +82,7 @@ export default function UsesPage() {
                 href="https://github.com/YaLTeR/niri"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-wisteria-500 dark:text-wisteria-300 underline"
+                className="a"
               >
                 Niri
               </a>{" "}
@@ -94,7 +94,7 @@ export default function UsesPage() {
                 href="https://github.com/quickshell-mirror/quickshell"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-wisteria-500 dark:text-wisteria-300 underline"
+                className="a"
               >
                 Quickshell
               </a>
@@ -103,17 +103,17 @@ export default function UsesPage() {
           </ul>
 
           {/* Editor + Terminal */}
-          <div className="my-6 h-px bg-wisteria-500/20 dark:bg-wisteria-300/10" />
+          <div className="my-6 h-px bg-paradise-300/10" />
 
           <h2 className="text-2xl mt-4 tracking-tight">Editor + Terminal</h2>
-          <ul className="space-y-2 list-disc list-outside ml-4 dark:text-gray-200 mt-2 text-base">
+          <ul className="space-y-2 list-disc list-outside ml-4 text-neutral-200 mt-2 text-base">
             <li>
               I commonly use{" "}
               <a
                 href="https://code.visualstudio.com/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-wisteria-500 dark:text-wisteria-300 underline"
+                className="a"
               >
                 VS Code
               </a>
@@ -122,7 +122,7 @@ export default function UsesPage() {
                 href="https://neovim.io/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-wisteria-500 dark:text-wisteria-300 underline"
+                className="a"
               >
                 Neovim
               </a>{" "}
@@ -134,7 +134,7 @@ export default function UsesPage() {
                 href="https://github.com/catppuccin/catppuccin"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-wisteria-500 dark:text-wisteria-300 underline"
+                className="a"
               >
                 Catppuccin
               </a>{" "}
@@ -146,7 +146,7 @@ export default function UsesPage() {
                 href="https://www.jetbrains.com/lp/mono/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-wisteria-500 dark:text-wisteria-300 underline"
+                className="a"
               >
                 JetBrains Mono
               </a>{" "}
@@ -158,7 +158,7 @@ export default function UsesPage() {
                 href="https://codeberg.org/dnkl/foot"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-wisteria-500 dark:text-wisteria-300 underline"
+                className="a"
               >
                 Foot
               </a>
@@ -167,7 +167,7 @@ export default function UsesPage() {
                 href="https://wezfurlong.org/wezterm/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-wisteria-500 dark:text-wisteria-300 underline"
+                className="a"
               >
                 WezTerm
               </a>{" "}
@@ -176,7 +176,7 @@ export default function UsesPage() {
                 href="https://ghostty.example.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-wisteria-500 dark:text-wisteria-300 underline"
+                className="a"
               >
                 Ghostty
               </a>
@@ -188,17 +188,17 @@ export default function UsesPage() {
           </ul>
 
           {/* Desktop Apps */}
-          <div className="my-6 h-px bg-wisteria-500/20 dark:bg-wisteria-300/10" />
+          <div className="my-6 h-px bg-paradise-300/10" />
 
           <h2 className="text-2xl mt-4 tracking-tight">Desktop Apps</h2>
-          <ul className="space-y-2 list-disc list-outside ml-4 dark:text-gray-200 mt-2 text-base">
+          <ul className="space-y-2 list-disc list-outside ml-4 text-neutral-200 mt-2 text-base">
             <li>
               I use{" "}
               <a
                 href="https://zen-browser.app"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-wisteria-500 dark:text-wisteria-300 underline"
+                className="a"
               >
                 Zen
               </a>{" "}
@@ -211,7 +211,7 @@ export default function UsesPage() {
                 href="https://vesktop.dev/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-wisteria-500 dark:text-wisteria-300 underline"
+                className="a"
               >
                 Vesktop
               </a>{" "}
@@ -223,7 +223,7 @@ export default function UsesPage() {
                 href="https://obsidian.md"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-wisteria-500 dark:text-wisteria-300 underline"
+                className="a"
               >
                 Obsidian
               </a>{" "}
@@ -235,7 +235,7 @@ export default function UsesPage() {
                 href="https://www.figma.com/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-wisteria-500 dark:text-wisteria-300 underline"
+                className="a"
               >
                 Figma
               </a>{" "}
@@ -244,7 +244,7 @@ export default function UsesPage() {
                 href="https://www.penpot.app"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-wisteria-500 dark:text-wisteria-300 underline"
+                className="a"
               >
                 Penpot
               </a>{" "}
@@ -256,7 +256,7 @@ export default function UsesPage() {
                 href="https://github.com/sxyazi/yazi"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-wisteria-500 dark:text-wisteria-300 underline"
+                className="a"
               >
                 Yazi
               </a>{" "}

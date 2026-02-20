@@ -11,13 +11,13 @@ export default function BlogPage() {
       <div className="flex flex-row gap-2 text-xl mb-4">
         <Link
           href="#"
-          className="bg-neutral-400 hover:bg-neutral-400 dark:bg-neutral-800 dark:hover:bg-neutral-800 px-2 rounded-lg a opacity-0 animate-[fadeIn_0.5s_ease-out_0.2s_forwards]"
+          className="bg-neutral-800 hover:bg-neutral-700 px-2 rounded-lg a transition-colors duration-200 opacity-0 animate-[fadeIn_0.5s_ease-out_0.2s_forwards]"
         >
           Main
         </Link>
         <Link
           href="/blog/weeklies"
-          className="bg-neutral-300 hover:bg-slate-400 dark:bg-neutral-700 dark:hover:bg-neutral-800 px-2 rounded-lg a opacity-0 animate-[fadeIn_0.5s_ease-out_0.25s_forwards]"
+          className="bg-neutral-700 hover:bg-neutral-600 px-2 rounded-lg a transition-colors duration-200 opacity-0 animate-[fadeIn_0.5s_ease-out_0.25s_forwards]"
         >
           Weeklies
         </Link>

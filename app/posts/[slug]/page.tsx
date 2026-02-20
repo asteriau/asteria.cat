@@ -65,20 +65,20 @@ export default function Page(props: { params: Promise<{ slug: string }> }) {
             </h1>
 
             {post.coAuthors && (
-              <div className="my-2 text-md text-gray-800 dark:text-gray-100">
+              <div className="my-2 text-md text-neutral-200">
                 With {post.coAuthors.join(", ")}
               </div>
             )}
 
-            <div className="mb-8 text-sm text-gray-800 dark:text-gray-100">
+            <div className="mb-8 text-sm text-neutral-200">
               {format(parseISO(post.datePublished), "MMM. dd, yyyy")}
-              <span className="text-gray-700 dark:text-gray-400">
+              <span className="text-neutral-400">
                 {" "}
                 – <TimeAgo date={post.datePublished} />
               </span>
 
               {post.lastUpdated && (
-                <span className="text-gray-700 dark:text-gray-400">
+                <span className="text-neutral-400">
                   {" "}
                   Last updated{" "}
                   {format(
@@ -97,7 +97,7 @@ export default function Page(props: { params: Promise<{ slug: string }> }) {
           </header>
 
           {/* 👇 THIS is the important bit */}
-          <div className="prose dark:prose-invert">
+          <div className="prose prose-invert">
             <DeferredMDX code={post.body.code} />
           </div>
         </article>

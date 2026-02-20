@@ -70,7 +70,7 @@ function ProjectCard({
   links,
 }: ProjectData) {
   return (
-    <Card className="text-lg w-screen max-w-full h-full min-h-0 dark:bg-neutral-900/10 flex flex-col items-left justify-between md:col-span-2">
+    <Card className="text-lg w-screen max-w-full h-full min-h-0 bg-[#1E1E1E]/10 flex flex-col items-left justify-between md:col-span-2">
       <div className="flex flex-row h-min justify-left gap-2">
         {imageUrl && (
           <img
@@ -81,7 +81,7 @@ function ProjectCard({
         )}
         <div className="flex flex-col items-left justify-center">
           <div className="text-xl">{title}</div>
-          <div className="text-sm dark:text-neutral-400 text-neutral-700">
+          <div className="text-sm text-neutral-400">
             {subtitle}
           </div>
         </div>
@@ -94,14 +94,14 @@ function ProjectCard({
         ))}
       </div>
       <div>
-        <div className="text-sm dark:text-wisteria-400 text-wisteria-700 -mb-2 mt-1">
+        <div className="text-sm text-paradise-300 -mb-2 mt-1">
           {links.map((link, i) => {
             const LinkIcon = link.LinkIcon ?? LuLink;
             return (
               <a
                 href={link.link}
                 target="_blank"
-                className="pr-4 align-text-bottom"
+                className="pr-4 align-text-bottom hover:text-paradise-200 transition-colors duration-200"
                 key={i + link.link}
               >
                 <LinkIcon className="inline mb-1 mr-1 text-lg" />{" "}

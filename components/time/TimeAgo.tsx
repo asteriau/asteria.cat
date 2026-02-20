@@ -7,7 +7,7 @@ export default function TimeAgo(props: {
   parentheses?: boolean;
 }) {
   return (
-    <span className="dark:text-gray-400 text-gray-700">
+    <span className="text-neutral-400">
       {props.parentheses === true || props.parentheses === undefined ? "(" : ""}
       {timeAgo(props.date)}
       {props.parentheses === true || props.parentheses === undefined ? ")" : ""}

@@ -23,7 +23,7 @@ export function PrettyImage({
 }) {
   return (
     <figure
-      className={`${caption && "shadow-sm dark:shadow-slate-800 shadow-slate-200"} place-self-center w-max`}
+      className={`${caption && "shadow-sm shadow-slate-800"} place-self-center w-max`}
       style={{ width: width + "px" }}
     >
       <img
@@ -31,7 +31,7 @@ export function PrettyImage({
         alt={alt}
         className={`duration-700 delay-200 ${
           noShadow ??
-          "dark:bg-black shadow-lg dark:shadow-slate-800 shadow-slate-300"
+          "bg-black shadow-lg shadow-slate-800"
         } ${caption ? "rounded-t-lg" : round ? "rounded-full" : "rounded-xl"} ${
           className ?? ""
         }`}
@@ -39,8 +39,8 @@ export function PrettyImage({
         width={width}
       />
       {caption && (
-        <div className="dark:bg-[rgb(28,28,28)] text-wrap border-[rgb(51,51,51)] border-[1px] mx-0 pt-1 pb-4 px-4 rounded-b-lg shadow-xl dark:shadow-[rgb(22,22,22)]">
-          <figcaption className="text-neutral-800 dark:text-neutral-200">
+        <div className="bg-[rgb(28,28,28)] text-wrap border-[rgb(51,51,51)] border-[1px] mx-0 pt-1 pb-4 px-4 rounded-b-lg shadow-xl shadow-[rgb(22,22,22)]">
+          <figcaption className="text-neutral-200">
             {caption}
           </figcaption>
         </div>
@@ -65,7 +65,7 @@ export function EmbedCard({
 }) {
   return (
     <div className="flex items-center justify-center py-4">
-      <div className="dark:bg-[rgb(28,28,28)] hover:dark:bg-[rgb(35,35,35)] border-[rgb(51,51,51)] border-[1px] mx-0 px-4 py-2 rounded-lg shadow-xl hover:shadow-2xl transition-all duration-300 dark:shadow-[rgb(22,22,22)] max-w-md w-full">
+      <div className="bg-[rgb(28,28,28)] hover:bg-[rgb(35,35,35)] border-[rgb(51,51,51)] border-[1px] mx-0 px-4 py-2 rounded-lg shadow-xl hover:shadow-2xl transition-all duration-300 shadow-[rgb(22,22,22)] max-w-md w-full">
         {thumbnail != undefined ? (
           <div className="-my-6">
             <PrettyImage
@@ -79,7 +79,7 @@ export function EmbedCard({
           ""
         )}
         <a href={url}>
-          <div className="text-2xl dark:text-gray-200 text-gray-800">
+          <div className="text-2xl text-gray-200">
             {title}
           </div>
         </a>
@@ -97,7 +97,7 @@ export const mdxComponents = {
 export default function MDX({ code }: { code: string }) {
   const MDXContent = useMDXComponent(code);
   return (
-    <div className="prose dark:prose-invert">
+    <div className="prose prose-invert">
       <MDXContent components={mdxComponents} />
     </div>
   );

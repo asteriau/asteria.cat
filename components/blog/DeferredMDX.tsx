@@ -9,11 +9,11 @@ const SKELETON_LINES = 8;
 
 function MDXSkeleton() {
   return (
-    <div className="prose dark:prose-invert animate-pulse space-y-3">
+    <div className="prose prose-invert animate-pulse space-y-3">
       {Array.from({ length: SKELETON_LINES }).map((_, i) => (
         <div
           key={i}
-          className="h-4 rounded bg-neutral-200/80 dark:bg-neutral-700/50"
+          className="h-4 rounded bg-neutral-700/50"
           style={{ width: i === SKELETON_LINES - 1 ? "60%" : "100%" }}
         />
       ))}
@@ -69,7 +69,7 @@ export default function DeferredMDX({
 
   return (
     <ScrollReveal rootMargin="0px 0px -60px 0px" threshold={0}>
-      <div className="prose dark:prose-invert">
+      <div className="prose prose-invert">
         <MDXContent {...({ components: mdxComponents } as object)} />
       </div>
     </ScrollReveal>
