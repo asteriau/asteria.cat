@@ -131,14 +131,14 @@ export default function UsesPage() {
             <li>
               I use{" "}
               <a
-                href="https://github.com/catppuccin/catppuccin"
+                href="https://github.com/paradise-theme/paradise/tree/main"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="a"
               >
-                Catppuccin
+                Paradise
               </a>{" "}
-              as my theme everywhere, including some parts of this website.
+              as my theme everywhere, including this website.
             </li>
             <li>
               My font of choice is{" "}
