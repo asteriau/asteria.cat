@@ -74,7 +74,7 @@ function ProjectCard({
       <div className="flex flex-row h-min justify-left gap-2">
         {imageUrl && (
           <img
-            src="/tinies.webp"
+            src="/pfp.jpg"
             alt="{title} logo"
             className="w-16 h-16 rounded-lg"
           />

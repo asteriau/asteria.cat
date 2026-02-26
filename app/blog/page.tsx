@@ -7,7 +7,6 @@ export default function BlogPage() {
 
   return (
     <div className="py-8 animate-page-in">
-      {/* Navigation tabs - fade in smoothly */}
       <div className="flex flex-row gap-2 text-xl mb-4">
         <Link
           href="#"
@@ -23,7 +22,6 @@ export default function BlogPage() {
         </Link>
       </div>
       
-      {/* Post cards - let PostCard components handle their own animations */}
       <div className="mx-auto w-full max-w-prose">
         {posts.map((post, index) => (
           <PostCard key={post._raw.flattenedPath} post={post} />

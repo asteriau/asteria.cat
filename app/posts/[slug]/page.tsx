@@ -33,17 +33,6 @@ export async function generateMetadata({
       type: "article",
       publishedTime: datePublished,
       url: getPostUrl(post._raw.flattenedPath),
-      images: [
-        {
-          url: `https://ogimage-workers.kanbaru.workers.dev/?title=${encodeURIComponent(
-            title,
-          )}&liner=${encodeURIComponent(
-            description,
-          )}&date=${format(parseISO(post.datePublished), "MMM. dd, yyyy")}`,
-          width: 1200,
-          height: 630,
-        },
-      ],
     },
   };
 }
@@ -96,7 +85,6 @@ export default function Page(props: { params: Promise<{ slug: string }> }) {
             </div>
           </header>
 
-          {/* 👇 THIS is the important bit */}
           <div className="prose prose-invert">
             <DeferredMDX code={post.body.code} />
           </div>
