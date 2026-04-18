@@ -34,7 +34,7 @@ const Card = ({ children, className = "", ...props }) => {
         className,
         "liquid-glass",
         "flex flex-col rounded-2xl overflow-clip",
-        "bg-white/[0.07] p-4",
+        "bg-white/[0.03] p-4",
         "shadow-[0_1px_2px_rgba(0,0,0,0.12),0_4px_16px_rgba(0,0,0,0.22),0_16px_48px_rgba(0,0,0,0.18)]",
         "transition-shadow duration-300",
         "hover:shadow-[0_2px_4px_rgba(0,0,0,0.14),0_8px_24px_rgba(0,0,0,0.28),0_24px_60px_rgba(0,0,0,0.22)]",

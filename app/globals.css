@@ -96,7 +96,7 @@ html {
 }
 
 .animate-stagger-in {
-    animation: fadeInUp 0.4s ease-out both;
+    animation: pageIn 0.4s ease-out both;
 }
 
 /* --- Prose reveal --- */
@@ -240,8 +240,8 @@ table {
 /* --- Liquid Glass --- */
 .liquid-glass {
   position: relative;
-  -webkit-backdrop-filter: blur(40px) saturate(180%) brightness(1.06);
-  backdrop-filter: blur(40px) saturate(180%) brightness(1.06);
+  -webkit-backdrop-filter: blur(12px) saturate(210%) brightness(1.08);
+  backdrop-filter: blur(12px) saturate(210%) brightness(1.08);
 }
 
 /* Gradient border: bright top → subtle bottom, always visible */

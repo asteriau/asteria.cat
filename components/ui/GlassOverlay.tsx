@@ -71,15 +71,15 @@ void main() {
     float edgeF = 1.0 - smoothstep(0.0, edgeFeath, max(-sdf, 0.0));
 
     // --- Chromatic aberration tint at edges ---
-    vec3 caColor = vec3(0.08, 0.02, 0.14) * edgeF * inF;
-    caColor      = mix(caColor, vec3(0.553, 0.639, 0.725) * 0.14, edgeF * 0.45);
+    vec3 caColor = vec3(0.04, 0.02, 0.22) * edgeF * inF;
+    caColor      = mix(caColor, vec3(0.553, 0.639, 0.725) * 0.22, edgeF * 0.60);
 
-    // --- Animated grain (very subtle — iOS 26 glass is clean) ---
+    // --- Animated grain (subtle surface micro-texture) ---
     float grain = noise(fc / 1.8 + vec2(uTime * 7.3, uTime * 5.7));
-    grain = (grain - 0.5) * 0.032 * inF;
+    grain = (grain - 0.5) * 0.048 * inF;
 
     vec3 contrib = caColor + grain;
-    float a      = clamp(edgeF * inF * 0.12 + abs(grain) * 0.4, 0.0, 1.0);
+    float a      = clamp(edgeF * inF * 0.22 + abs(grain) * 0.55, 0.0, 1.0);
 
     col   += contrib;
     alpha  = max(alpha, a);
