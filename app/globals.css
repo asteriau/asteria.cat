@@ -289,6 +289,78 @@ table {
     inset 0 -1px 0   rgba(0, 0, 0, 0.18);
 }
 
+/* --- Refractive Lens Nav --- */
+.refract-lens-nav {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 4px;
+  height: 44px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.045);
+  -webkit-backdrop-filter: blur(12px) saturate(210%) brightness(1.08);
+  backdrop-filter: blur(12px) saturate(210%) brightness(1.08);
+}
+
+.refract-lens {
+  position: absolute;
+  top: 4px;
+  left: 0;
+  height: calc(100% - 8px);
+  border-radius: 999px;
+  z-index: 0;
+  pointer-events: none;
+  will-change: transform, width;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.10), rgba(255, 255, 255, 0.02));
+  -webkit-backdrop-filter: saturate(180%) contrast(1.05);
+  backdrop-filter: saturate(180%) contrast(1.05);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.40),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.28),
+    0 0 0 1px rgba(255, 255, 255, 0.10),
+    0 10px 30px -10px rgba(141, 163, 185, 0.5);
+  transition:
+    transform 0.5s cubic-bezier(0.25, 0.8, 0.25, 1),
+    width 0.5s cubic-bezier(0.25, 0.8, 0.25, 1),
+    opacity 0.3s ease;
+}
+
+.refract-lens::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background:
+    linear-gradient(115deg, rgba(169, 136, 176, 0.25), transparent 40%),
+    linear-gradient(295deg, rgba(138, 166, 162, 0.22), transparent 40%);
+  mix-blend-mode: screen;
+  opacity: 0.9;
+}
+
+.refract-lens-link {
+  position: relative;
+  padding: 0 16px;
+  height: 100%;
+  display: inline-flex;
+  align-items: center;
+  color: rgba(232, 227, 227, 0.55);
+  text-decoration: none;
+  font-size: 13.5px;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: color 0.4s ease, text-shadow 0.4s ease;
+  z-index: 1;
+}
+
+.refract-lens-link:hover {
+  color: var(--color-paradise-100, #E8E3E3);
+}
+
+.refract-lens-link.active {
+  color: var(--color-paradise-200);
+  text-shadow: 0 0 14px rgba(141, 163, 185, 0.5), 0 0 2px rgba(184, 197, 212, 0.25);
+}
+
 /* --- Shiki theme --- */
 code[data-theme*=" "],
 code[data-theme*=" "] span {
