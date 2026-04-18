@@ -36,18 +36,10 @@ export default function HeaderLink(props: {
       href={props.href}
       className={clsx(
         "liquid-glass relative overflow-hidden rounded-full py-1 px-3 md:px-4",
-        "border transition-all duration-300",
-        "text-sm font-medium",
+        "transition-all duration-300 text-sm font-medium",
         isActive
-          ? [
-              "border-paradise-300/30",
-              "bg-paradise-300/[0.09] text-paradise-100",
-            ]
-          : [
-              "border-white/[0.10]",
-              "bg-white/[0.04] text-neutral-300",
-              "hover:bg-white/[0.08] hover:text-white hover:border-white/[0.15]",
-            ],
+          ? "glass-active bg-paradise-300/[0.10] text-paradise-100"
+          : "bg-white/[0.05] text-neutral-300 hover:bg-white/[0.09] hover:text-white",
       )}
     >
       <span className="relative z-10">{props.label}</span>

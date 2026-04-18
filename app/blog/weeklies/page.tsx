@@ -12,13 +12,13 @@ export default function WeekliesPage() {
         <div className="flex flex-row gap-2 mb-6">
           <Link
             href="/blog"
-            className="liquid-glass rounded-full px-3 py-1 border border-white/[0.10] bg-white/[0.04] text-neutral-300 hover:bg-white/[0.08] hover:text-white text-sm font-medium transition-all duration-300"
+            className="liquid-glass rounded-full px-3 py-1 bg-white/[0.05] text-neutral-300 hover:bg-white/[0.09] hover:text-white text-sm font-medium transition-all duration-300"
           >
             Main
           </Link>
           <Link
             href="/blog/weeklies"
-            className="liquid-glass rounded-full px-3 py-1 border border-paradise-300/30 bg-paradise-300/[0.09] text-paradise-100 text-sm font-medium"
+            className="liquid-glass glass-active rounded-full px-3 py-1 bg-paradise-300/[0.10] text-paradise-100 text-sm font-medium"
           >
             Weeklies
           </Link>

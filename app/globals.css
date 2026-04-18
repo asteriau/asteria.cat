@@ -239,12 +239,43 @@ table {
 
 /* --- Liquid Glass --- */
 .liquid-glass {
-  --mx: 0.5;
-  --my: 0.5;
   position: relative;
+  -webkit-backdrop-filter: blur(40px) saturate(180%) brightness(1.06);
+  backdrop-filter: blur(40px) saturate(180%) brightness(1.06);
 }
 
-/* Inner depth: top rim bright, bottom rim dark — glass thickness illusion */
+/* Gradient border: bright top → subtle bottom, always visible */
+.liquid-glass::before {
+  content: '';
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.01) 0%,
+    rgba(255, 255, 255, 0.10) 40%,
+    rgba(255, 255, 255, 0.05) 100%
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  z-index: 2;
+}
+
+/* Active state: paradise-blue tinted gradient border */
+.liquid-glass.glass-active::before {
+  background: linear-gradient(
+    to bottom,
+    rgba(141, 163, 185, 0.40) 0%,
+    rgba(141, 163, 185, 0.18) 40%,
+    rgba(141, 163, 185, 0.08) 100%
+  );
+}
+
+/* Inner depth: bright top rim + soft inner glow */
 .liquid-glass::after {
   content: '';
   pointer-events: none;
@@ -253,10 +284,9 @@ table {
   border-radius: inherit;
   z-index: 1;
   box-shadow:
-    inset 0  1px 1px rgba(255, 255, 255, 0.12),
-    inset 0 -1px 1px rgba(0, 0, 0, 0.28),
-    inset  1px 0  1px rgba(255, 255, 255, 0.05),
-    inset -1px 0  1px rgba(0, 0, 0, 0.10);
+    inset 0  1px 0   rgba(255, 255, 255, 0.22),
+    inset 0  2px 6px rgba(255, 255, 255, 0.05),
+    inset 0 -1px 0   rgba(0, 0, 0, 0.18);
 }
 
 /* --- Shiki theme --- */

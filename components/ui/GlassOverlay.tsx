@@ -74,12 +74,12 @@ void main() {
     vec3 caColor = vec3(0.08, 0.02, 0.14) * edgeF * inF;
     caColor      = mix(caColor, vec3(0.553, 0.639, 0.725) * 0.14, edgeF * 0.45);
 
-    // --- Animated grain ---
-    float grain = noise(fc / 1.6 + vec2(uTime * 7.3, uTime * 5.7));
-    grain = (grain - 0.5) * 0.075 * inF;
+    // --- Animated grain (very subtle — iOS 26 glass is clean) ---
+    float grain = noise(fc / 1.8 + vec2(uTime * 7.3, uTime * 5.7));
+    grain = (grain - 0.5) * 0.032 * inF;
 
     vec3 contrib = caColor + grain;
-    float a      = clamp(edgeF * inF * 0.14 + abs(grain) * 0.5, 0.0, 1.0);
+    float a      = clamp(edgeF * inF * 0.12 + abs(grain) * 0.4, 0.0, 1.0);
 
     col   += contrib;
     alpha  = max(alpha, a);

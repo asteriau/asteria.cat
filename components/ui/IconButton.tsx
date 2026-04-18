@@ -15,10 +15,9 @@ export const IconButton = (props: IconButtonProps) => {
         props.className,
         "liquid-glass",
         "flex items-center justify-center w-10 h-10 p-3 rounded-full",
-        "border border-white/[0.10] bg-white/[0.04]",
-        "backdrop-blur-xl backdrop-saturate-[180%]",
+        "bg-white/[0.05]",
         "transition-all duration-150 cursor-pointer",
-        "hover:bg-white/[0.08] hover:border-white/[0.15]",
+        "hover:bg-white/[0.09]",
         "disabled:cursor-default disabled:opacity-40",
       )}
       disabled={props.disabled}
