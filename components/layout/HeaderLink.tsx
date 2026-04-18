@@ -2,6 +2,8 @@
 import clsx from "clsx";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useLayoutEffect, useRef } from "react";
+import { registerCard, unregisterCard } from "@/components/ui/glassStore";
 
 export default function HeaderLink(props: {
   href: string;
@@ -9,63 +11,46 @@ export default function HeaderLink(props: {
   alsoMatch?: string[];
 }) {
   const pathname = usePathname();
+  const ref = useRef<HTMLAnchorElement>(null);
 
   const match = () => {
-    if (props.href === "/") {
-      return props.href === pathname;
-    }
-    if (props.alsoMatch) {
-      const res = props.alsoMatch.some((alsoMatch) =>
-        pathname.startsWith(alsoMatch),
-      );
-      if (res) return true;
-    }
+    if (props.href === "/") return props.href === pathname;
+    if (props.alsoMatch?.some((m) => pathname.startsWith(m))) return true;
     return pathname.startsWith(props.href) || props.href === pathname;
   };
 
   const isActive = match();
 
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    registerCard(el);
+    const ro = new ResizeObserver(() => { unregisterCard(el); registerCard(el); });
+    ro.observe(el);
+    return () => { ro.disconnect(); unregisterCard(el); };
+  }, []);
+
   return (
     <Link
+      ref={ref}
       href={props.href}
       className={clsx(
-        "header-link relative overflow-hidden border py-1 px-3 md:px-4 rounded-full",
-        "transition-all duration-300 z-0 group",
-        "bg-neutral-800/40",
-        "border-[#252525]",
-        "text-neutral-300",
-        "hover:text-white",
-        "backdrop-blur-lg",
-        isActive && [
-          "border-paradise-300/25",
-          "text-paradise-100",
-        ],
+        "liquid-glass relative overflow-hidden rounded-full py-1 px-3 md:px-4",
+        "border transition-all duration-300",
+        "text-sm font-medium",
+        isActive
+          ? [
+              "border-paradise-300/30",
+              "bg-paradise-300/[0.09] text-paradise-100",
+            ]
+          : [
+              "border-white/[0.10]",
+              "bg-white/[0.04] text-neutral-300",
+              "hover:bg-white/[0.08] hover:text-white hover:border-white/[0.15]",
+            ],
       )}
     >
-      <div
-        className={clsx(
-          "absolute inset-0 rounded-full z-0",
-          "bg-gradient-to-br from-[#8DA3B9]/20 via-[#151515]/45 to-[#A988B0]/15",
-          "transition-all duration-700 ease-out",
-          isActive ? "scale-100 opacity-100" : "scale-50 opacity-0",
-        )}
-      />
-
-      <div
-        className={clsx(
-          "absolute inset-0 rounded-full z-0 transition-opacity duration-500",
-          "bg-neutral-800/40",
-          isActive ? "opacity-0" : "opacity-100",
-        )}
-      />
-
-      {!isActive && (
-        <div className="absolute inset-0 rounded-full z-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-in-out bg-paradise-900/20" />
-      )}
-
-      <span className="z-10 relative transition-colors duration-500">
-        {props.label}
-      </span>
+      <span className="relative z-10">{props.label}</span>
     </Link>
   );
 }

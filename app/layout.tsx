@@ -6,6 +6,7 @@ import Header from "@/components/layout/Header";
 import { Conditional } from "@/components/background/conditional";
 import { Suspense } from "react";
 import GrainientLoader from "@/components/background/grainient-loader";
+import GlassOverlayLoader from "@/components/ui/GlassOverlayLoader";
 
 export const metadata: Metadata = {
   title: "asteria.cat",
@@ -83,6 +84,7 @@ export default function RootLayout({
                 <GrainientLoader />
               </Suspense>
             </Conditional>
+            <GlassOverlayLoader />
             <div className="px-4 py-5 mx-2 mb-8 sm:px-6 max-w-full max-h-full md:max-w-screen-xl">
               <Conditional
                 paths={["/", "/projects"]}

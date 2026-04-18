@@ -237,6 +237,28 @@ table {
     @apply px-4 py-3 font-mono text-xs font-medium border rounded-lg rounded-b-none text-neutral-200 border-[#333333] bg-[#1c1c1c];
 }
 
+/* --- Liquid Glass --- */
+.liquid-glass {
+  --mx: 0.5;
+  --my: 0.5;
+  position: relative;
+}
+
+/* Inner depth: top rim bright, bottom rim dark — glass thickness illusion */
+.liquid-glass::after {
+  content: '';
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  z-index: 1;
+  box-shadow:
+    inset 0  1px 1px rgba(255, 255, 255, 0.12),
+    inset 0 -1px 1px rgba(0, 0, 0, 0.28),
+    inset  1px 0  1px rgba(255, 255, 255, 0.05),
+    inset -1px 0  1px rgba(0, 0, 0, 0.10);
+}
+
 /* --- Shiki theme --- */
 code[data-theme*=" "],
 code[data-theme*=" "] span {
