@@ -1,288 +1,366 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import { Renderer, Program, Mesh, Triangle } from "ogl";
+import { useRef, useEffect, useState } from "react";
+import { Renderer, Program, Triangle, Mesh } from "ogl";
 
 const hexToRgb = (hex: string): [number, number, number] => {
-  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  if (!result) return [1, 1, 1];
-  return [
-    parseInt(result[1], 16) / 255,
-    parseInt(result[2], 16) / 255,
-    parseInt(result[3], 16) / 255,
-  ];
+  const m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return m
+    ? [parseInt(m[1], 16) / 255, parseInt(m[2], 16) / 255, parseInt(m[3], 16) / 255]
+    : [1, 1, 1];
 };
 
-const vertex = /* glsl */ `#version 300 es
-in vec2 position;
+const getAnchorAndDir = (
+  origin: string,
+  w: number,
+  h: number
+): { anchor: [number, number]; dir: [number, number] } => {
+  const outside = 0.2;
+  switch (origin) {
+    case "top-left":
+      return { anchor: [0, -outside * h], dir: [0, 1] };
+    case "top-right":
+      return { anchor: [w, -outside * h], dir: [0, 1] };
+    case "left":
+      return { anchor: [-outside * w, 0.5 * h], dir: [1, 0] };
+    case "right":
+      return { anchor: [(1 + outside) * w, 0.5 * h], dir: [-1, 0] };
+    case "bottom-left":
+      return { anchor: [0, (1 + outside) * h], dir: [0, -1] };
+    case "bottom-center":
+      return { anchor: [0.5 * w, (1 + outside) * h], dir: [0, -1] };
+    case "bottom-right":
+      return { anchor: [w, (1 + outside) * h], dir: [0, -1] };
+    default:
+      return { anchor: [0.5 * w, -outside * h], dir: [0, 1] };
+  }
+};
+
+const vert = `
+attribute vec2 position;
+varying vec2 vUv;
 void main() {
+  vUv = position * 0.5 + 0.5;
   gl_Position = vec4(position, 0.0, 1.0);
 }`;
 
-const fragment = /* glsl */ `#version 300 es
-precision highp float;
+const frag = `precision highp float;
 
-uniform vec2 iResolution;
 uniform float iTime;
-uniform float uTimeSpeed;
-uniform float uColorBalance;
-uniform float uWarpStrength;
-uniform float uWarpFrequency;
-uniform float uWarpSpeed;
-uniform float uWarpAmplitude;
-uniform float uBlendAngle;
-uniform float uBlendSoftness;
-uniform float uRotationAmount;
-uniform float uNoiseScale;
-uniform float uGrainAmount;
-uniform float uGrainScale;
-uniform float uGrainAnimated;
-uniform float uContrast;
-uniform float uGamma;
-uniform float uSaturation;
-uniform vec2 uCenterOffset;
-uniform float uZoom;
-uniform vec3 uColor1;
-uniform vec3 uColor2;
-uniform vec3 uColor3;
+uniform vec2  iResolution;
+uniform vec2  rayPos;
+uniform vec2  rayDir;
+uniform vec3  raysColor;
+uniform float raysSpeed;
+uniform float lightSpread;
+uniform float rayLength;
+uniform float pulsating;
+uniform float fadeDistance;
+uniform float saturation;
+uniform vec2  mousePos;
+uniform float mouseInfluence;
+uniform float noiseAmount;
+uniform float distortion;
 
-out vec4 fragColor;
+varying vec2 vUv;
 
-#define S(a,b,t) smoothstep(a,b,t)
-
-mat2 Rot(float a) {
-  float s = sin(a), c = cos(a);
-  return mat2(c, -s, s, c);
+float noise(vec2 st) {
+  return fract(sin(dot(st.xy, vec2(12.9898,78.233))) * 43758.5453123);
 }
 
-vec2 hash(vec2 p) {
-  p = vec2(dot(p, vec2(2127.1, 81.17)), dot(p, vec2(1269.5, 283.37)));
-  return fract(sin(p) * 43758.5453);
-}
+float rayStrength(vec2 raySource, vec2 rayRefDirection, vec2 coord,
+                  float seedA, float seedB, float speed) {
+  vec2 sourceToCoord = coord - raySource;
+  vec2 dirNorm = normalize(sourceToCoord);
+  float cosAngle = dot(dirNorm, rayRefDirection);
 
-float noise(vec2 p) {
-  vec2 i = floor(p), f = fract(p), u = f * f * (3.0 - 2.0 * f);
-  float n = mix(
-    mix(dot(-1.0 + 2.0 * hash(i + vec2(0.0, 0.0)), f - vec2(0.0, 0.0)),
-        dot(-1.0 + 2.0 * hash(i + vec2(1.0, 0.0)), f - vec2(1.0, 0.0)), u.x),
-    mix(dot(-1.0 + 2.0 * hash(i + vec2(0.0, 1.0)), f - vec2(0.0, 1.0)),
-        dot(-1.0 + 2.0 * hash(i + vec2(1.0, 1.0)), f - vec2(1.0, 1.0)), u.x),
-    u.y
+  float distortedAngle = cosAngle + distortion * sin(iTime * 2.0 + length(sourceToCoord) * 0.01) * 0.2;
+
+  float spreadFactor = pow(max(distortedAngle, 0.0), 1.0 / max(lightSpread, 0.001));
+
+  float distance = length(sourceToCoord);
+  float maxDistance = iResolution.x * rayLength;
+  float lengthFalloff = clamp((maxDistance - distance) / maxDistance, 0.0, 1.0);
+
+  float fadeFalloff = clamp((iResolution.x * fadeDistance - distance) / (iResolution.x * fadeDistance), 0.5, 1.0);
+  float pulse = pulsating > 0.5 ? (0.8 + 0.2 * sin(iTime * speed * 3.0)) : 1.0;
+
+  float baseStrength = clamp(
+    (0.45 + 0.15 * sin(distortedAngle * seedA + iTime * speed)) +
+    (0.3 + 0.2 * cos(-distortedAngle * seedB + iTime * speed)),
+    0.0, 1.0
   );
-  return 0.5 + 0.5 * n;
+
+  return baseStrength * lengthFalloff * fadeFalloff * spreadFactor * pulse;
 }
 
-void mainImage(out vec4 o, vec2 C) {
-  float t = iTime * uTimeSpeed;
-  vec2 uv = C / iResolution.xy;
-  float ratio = iResolution.x / iResolution.y;
+void mainImage(out vec4 fragColor, in vec2 fragCoord) {
+  vec2 coord = vec2(fragCoord.x, iResolution.y - fragCoord.y);
 
-  vec2 tuv = uv - 0.5 + uCenterOffset;
-  tuv /= max(uZoom, 0.001);
+  vec2 finalRayDir = rayDir;
+  if (mouseInfluence > 0.0) {
+    vec2 mouseScreenPos = mousePos * iResolution.xy;
+    vec2 mouseDirection = normalize(mouseScreenPos - rayPos);
+    finalRayDir = normalize(mix(rayDir, mouseDirection, mouseInfluence));
+  }
 
-  float degree = noise(vec2(t * 0.1, tuv.x * tuv.y) * uNoiseScale);
-  tuv.y *= 1.0 / ratio;
-  tuv *= Rot(radians((degree - 0.5) * uRotationAmount + 180.0));
-  tuv.y *= ratio;
+  vec4 rays1 = vec4(1.0) *
+               rayStrength(rayPos, finalRayDir, coord, 36.2214, 21.11349,
+                           1.5 * raysSpeed);
+  vec4 rays2 = vec4(1.0) *
+               rayStrength(rayPos, finalRayDir, coord, 22.3991, 18.0234,
+                           1.1 * raysSpeed);
 
-  float frequency = uWarpFrequency;
-  float ws = max(uWarpStrength, 0.001);
-  float amplitude = uWarpAmplitude / ws;
-  float warpTime = t * uWarpSpeed;
-  tuv.x += sin(tuv.y * frequency + warpTime) / amplitude;
-  tuv.y += sin(tuv.x * (frequency * 1.5) + warpTime) / (amplitude * 0.5);
+  fragColor = rays1 * 0.5 + rays2 * 0.4;
 
-  vec3 colLav = uColor1;
-  vec3 colOrg = uColor2;
-  vec3 colDark = uColor3;
+  if (noiseAmount > 0.0) {
+    float n = noise(coord * 0.01 + iTime * 0.1);
+    fragColor.rgb *= (1.0 - noiseAmount + noiseAmount * n);
+  }
 
-  float b = uColorBalance;
-  float s = max(uBlendSoftness, 0.0);
-  mat2 blendRot = Rot(radians(uBlendAngle));
-  float blendX = (tuv * blendRot).x;
+  float brightness = 1.0 - (coord.y / iResolution.y);
+  fragColor.x *= 0.1 + brightness * 0.8;
+  fragColor.y *= 0.3 + brightness * 0.6;
+  fragColor.z *= 0.5 + brightness * 0.5;
 
-  float edge0 = -0.3 - b - s;
-  float edge1 = 0.2 - b + s;
-  float v0 = 0.5 - b + s;
-  float v1 = -0.3 - b - s;
+  if (saturation != 1.0) {
+    float gray = dot(fragColor.rgb, vec3(0.299, 0.587, 0.114));
+    fragColor.rgb = mix(vec3(gray), fragColor.rgb, saturation);
+  }
 
-  vec3 layer1 = mix(colDark, colOrg, S(edge0, edge1, blendX));
-  vec3 layer2 = mix(colOrg, colLav, S(edge0, edge1, blendX));
-  vec3 col = mix(layer1, layer2, S(v0, v1, tuv.y));
-
-  vec2 grainUv = uv * max(uGrainScale, 0.001);
-  if (uGrainAnimated > 0.5) { grainUv += vec2(iTime * 0.05); }
-  float grain = fract(sin(dot(grainUv, vec2(12.9898, 78.233))) * 43758.5453);
-  col += (grain - 0.5) * uGrainAmount;
-
-  col = (col - 0.5) * uContrast + 0.5;
-  float luma = dot(col, vec3(0.2126, 0.7152, 0.0722));
-  col = mix(vec3(luma), col, uSaturation);
-  col = pow(max(col, 0.0), vec3(1.0 / max(uGamma, 0.001)));
-  col = clamp(col, 0.0, 1.0);
-
-  o = vec4(col, 1.0);
+  fragColor.rgb *= raysColor;
 }
 
 void main() {
-  vec4 o = vec4(0.0);
-  mainImage(o, gl_FragCoord.xy);
-  fragColor = o;
+  vec4 color;
+  mainImage(color, gl_FragCoord.xy);
+  gl_FragColor = color;
 }`;
 
-interface GrainientProps {
-  timeSpeed?: number;
-  colorBalance?: number;
-  warpStrength?: number;
-  warpFrequency?: number;
-  warpSpeed?: number;
-  warpAmplitude?: number;
-  blendAngle?: number;
-  blendSoftness?: number;
-  rotationAmount?: number;
-  noiseScale?: number;
-  grainAmount?: number;
-  grainScale?: number;
-  grainAnimated?: boolean;
-  contrast?: number;
-  gamma?: number;
+interface LightRaysProps {
+  raysOrigin?: string;
+  raysColor?: string;
+  raysSpeed?: number;
+  lightSpread?: number;
+  rayLength?: number;
+  pulsating?: boolean;
+  fadeDistance?: number;
   saturation?: number;
-  centerX?: number;
-  centerY?: number;
-  zoom?: number;
-  color1?: string;
-  color2?: string;
-  color3?: string;
+  followMouse?: boolean;
+  mouseInfluence?: number;
+  noiseAmount?: number;
+  distortion?: number;
   className?: string;
 }
 
-export default function Grainient({
-  timeSpeed = 0.2,
-  colorBalance = 0.0,
-  warpStrength = 1.0,
-  warpFrequency = 3.0,
-  warpSpeed = 1.5,
-  warpAmplitude = 40.0,
-  blendAngle = 0.0,
-  blendSoftness = 0.05,
-  rotationAmount = 300.0,
-  noiseScale = 2.0,
-  grainAmount = 0.06,
-  grainScale = 2.0,
-  grainAnimated = true,
-  contrast = 1.2,
-  gamma = 1.0,
+export default function LightRays({
+  raysOrigin = "top-center",
+  raysColor = "#ffffff",
+  raysSpeed = 1,
+  lightSpread = 1,
+  rayLength = 2,
+  pulsating = false,
+  fadeDistance = 1.0,
   saturation = 1.0,
-  centerX = 0.0,
-  centerY = 0.0,
-  zoom = 0.9,
-  color1 = "#252525",
-  color2 = "#252525",
-  color3 = "#8DA3B9",
+  followMouse = true,
+  mouseInfluence = 0.1,
+  noiseAmount = 0.0,
+  distortion = 0.0,
   className = "",
-}: GrainientProps) {
+}: LightRaysProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const uniformsRef = useRef<Record<string, { value: unknown }> | null>(null);
+  const rendererRef = useRef<Renderer | null>(null);
+  const mouseRef = useRef({ x: 0.5, y: 0.5 });
+  const smoothMouseRef = useRef({ x: 0.5, y: 0.5 });
+  const animationIdRef = useRef<number | null>(null);
+  const meshRef = useRef<Mesh | null>(null);
+  const cleanupFunctionRef = useRef<(() => void) | null>(null);
+  const [isVisible, setIsVisible] = useState(false);
+  const observerRef = useRef<IntersectionObserver | null>(null);
 
   useEffect(() => {
     if (!containerRef.current) return;
 
-    const renderer = new Renderer({
-      webgl: 2,
-      alpha: true,
-      antialias: false,
-      dpr: Math.min(window.devicePixelRatio || 1, 2),
-    });
-
-    const gl = renderer.gl;
-    const canvas = gl.canvas as HTMLCanvasElement;
-    canvas.style.width = "100%";
-    canvas.style.height = "100%";
-    canvas.style.display = "block";
-
-    const container = containerRef.current;
-    container.appendChild(canvas);
-
-    const geometry = new Triangle(gl);
-    const program = new Program(gl, {
-      vertex,
-      fragment,
-      uniforms: {
-        iTime: { value: 0 },
-        iResolution: { value: new Float32Array([1, 1]) },
-        uTimeSpeed: { value: timeSpeed },
-        uColorBalance: { value: colorBalance },
-        uWarpStrength: { value: warpStrength },
-        uWarpFrequency: { value: warpFrequency },
-        uWarpSpeed: { value: warpSpeed },
-        uWarpAmplitude: { value: warpAmplitude },
-        uBlendAngle: { value: blendAngle },
-        uBlendSoftness: { value: blendSoftness },
-        uRotationAmount: { value: rotationAmount },
-        uNoiseScale: { value: noiseScale },
-        uGrainAmount: { value: grainAmount },
-        uGrainScale: { value: grainScale },
-        uGrainAnimated: { value: grainAnimated ? 1.0 : 0.0 },
-        uContrast: { value: contrast },
-        uGamma: { value: gamma },
-        uSaturation: { value: saturation },
-        uCenterOffset: { value: new Float32Array([centerX, centerY]) },
-        uZoom: { value: zoom },
-        uColor1: { value: new Float32Array(hexToRgb(color1)) },
-        uColor2: { value: new Float32Array(hexToRgb(color2)) },
-        uColor3: { value: new Float32Array(hexToRgb(color3)) },
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        setIsVisible(entries[0].isIntersecting);
       },
-    });
-
-    const mesh = new Mesh(gl, { geometry, program });
-
-    const setSize = () => {
-      const rect = container.getBoundingClientRect();
-      const width = Math.max(1, Math.floor(rect.width));
-      const height = Math.max(1, Math.floor(rect.height));
-      renderer.setSize(width, height);
-      const res = program.uniforms.iResolution.value as Float32Array;
-      res[0] = gl.drawingBufferWidth;
-      res[1] = gl.drawingBufferHeight;
-    };
-
-    const ro = new ResizeObserver(setSize);
-    ro.observe(container);
-    setSize();
-
-    let raf = 0;
-    const t0 = performance.now();
-    const loop = (t: number) => {
-      (program.uniforms.iTime.value as number) = (t - t0) * 0.001;
-      renderer.render({ scene: mesh });
-      raf = requestAnimationFrame(loop);
-    };
-    raf = requestAnimationFrame(loop);
-
-    requestAnimationFrame(() => {
-      container.style.opacity = "1";
-    });
+      { threshold: 0.1 }
+    );
+    observerRef.current.observe(containerRef.current);
 
     return () => {
-      cancelAnimationFrame(raf);
-      ro.disconnect();
-      try {
-        container.removeChild(canvas);
-      } catch {
-        // already removed
+      observerRef.current?.disconnect();
+      observerRef.current = null;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!isVisible || !containerRef.current) return;
+
+    cleanupFunctionRef.current?.();
+    cleanupFunctionRef.current = null;
+
+    const initializeWebGL = async () => {
+      if (!containerRef.current) return;
+      await new Promise((resolve) => setTimeout(resolve, 10));
+      if (!containerRef.current) return;
+
+      const renderer = new Renderer({
+        dpr: Math.min(window.devicePixelRatio, 2),
+        alpha: true,
+      });
+      rendererRef.current = renderer;
+
+      const gl = renderer.gl;
+      (gl.canvas as HTMLCanvasElement).style.width = "100%";
+      (gl.canvas as HTMLCanvasElement).style.height = "100%";
+
+      while (containerRef.current.firstChild) {
+        containerRef.current.removeChild(containerRef.current.firstChild);
       }
+      containerRef.current.appendChild(gl.canvas as HTMLCanvasElement);
+
+      const uniforms: Record<string, { value: unknown }> = {
+        iTime: { value: 0 },
+        iResolution: { value: [1, 1] },
+        rayPos: { value: [0, 0] },
+        rayDir: { value: [0, 1] },
+        raysColor: { value: hexToRgb(raysColor) },
+        raysSpeed: { value: raysSpeed },
+        lightSpread: { value: lightSpread },
+        rayLength: { value: rayLength },
+        pulsating: { value: pulsating ? 1.0 : 0.0 },
+        fadeDistance: { value: fadeDistance },
+        saturation: { value: saturation },
+        mousePos: { value: [0.5, 0.5] },
+        mouseInfluence: { value: mouseInfluence },
+        noiseAmount: { value: noiseAmount },
+        distortion: { value: distortion },
+      };
+      uniformsRef.current = uniforms;
+
+      const geometry = new Triangle(gl);
+      const program = new Program(gl, { vertex: vert, fragment: frag, uniforms });
+      const mesh = new Mesh(gl, { geometry, program });
+      meshRef.current = mesh;
+
+      const updatePlacement = () => {
+        if (!containerRef.current || !renderer) return;
+        renderer.dpr = Math.min(window.devicePixelRatio, 2);
+        const { clientWidth: wCSS, clientHeight: hCSS } = containerRef.current;
+        renderer.setSize(wCSS, hCSS);
+        const w = wCSS * renderer.dpr;
+        const h = hCSS * renderer.dpr;
+        uniforms.iResolution.value = [w, h];
+        const { anchor, dir } = getAnchorAndDir(raysOrigin, w, h);
+        uniforms.rayPos.value = anchor;
+        uniforms.rayDir.value = dir;
+      };
+
+      let firstFrame = true;
+      const loop = (t: number) => {
+        if (!rendererRef.current || !uniformsRef.current || !meshRef.current) return;
+        uniforms.iTime.value = t * 0.001;
+
+        if (followMouse && mouseInfluence > 0.0) {
+          const smoothing = 0.92;
+          smoothMouseRef.current.x = smoothMouseRef.current.x * smoothing + mouseRef.current.x * (1 - smoothing);
+          smoothMouseRef.current.y = smoothMouseRef.current.y * smoothing + mouseRef.current.y * (1 - smoothing);
+          uniforms.mousePos.value = [smoothMouseRef.current.x, smoothMouseRef.current.y];
+        }
+
+        try {
+          renderer.render({ scene: mesh });
+          if (firstFrame && containerRef.current) {
+            firstFrame = false;
+            containerRef.current.style.opacity = "1";
+          }
+          animationIdRef.current = requestAnimationFrame(loop);
+        } catch {
+          return;
+        }
+      };
+
+      window.addEventListener("resize", updatePlacement);
+      updatePlacement();
+      animationIdRef.current = requestAnimationFrame(loop);
+
+      cleanupFunctionRef.current = () => {
+        if (animationIdRef.current) {
+          cancelAnimationFrame(animationIdRef.current);
+          animationIdRef.current = null;
+        }
+        window.removeEventListener("resize", updatePlacement);
+        try {
+          const canvas = renderer.gl.canvas as HTMLCanvasElement;
+          const ext = renderer.gl.getExtension("WEBGL_lose_context");
+          ext?.loseContext();
+          canvas.parentNode?.removeChild(canvas);
+        } catch {
+          // ignore
+        }
+        rendererRef.current = null;
+        uniformsRef.current = null;
+        meshRef.current = null;
+      };
+    };
+
+    initializeWebGL();
+
+    return () => {
+      cleanupFunctionRef.current?.();
+      cleanupFunctionRef.current = null;
     };
   }, [
-    timeSpeed, colorBalance, warpStrength, warpFrequency, warpSpeed,
-    warpAmplitude, blendAngle, blendSoftness, rotationAmount, noiseScale,
-    grainAmount, grainScale, grainAnimated, contrast, gamma, saturation,
-    centerX, centerY, zoom, color1, color2, color3,
+    isVisible, raysOrigin, raysColor, raysSpeed, lightSpread, rayLength,
+    pulsating, fadeDistance, saturation, followMouse, mouseInfluence,
+    noiseAmount, distortion,
   ]);
+
+  useEffect(() => {
+    if (!uniformsRef.current || !containerRef.current || !rendererRef.current) return;
+    const u = uniformsRef.current;
+    const renderer = rendererRef.current;
+    u.raysColor.value = hexToRgb(raysColor);
+    u.raysSpeed.value = raysSpeed;
+    u.lightSpread.value = lightSpread;
+    u.rayLength.value = rayLength;
+    u.pulsating.value = pulsating ? 1.0 : 0.0;
+    u.fadeDistance.value = fadeDistance;
+    u.saturation.value = saturation;
+    u.mouseInfluence.value = mouseInfluence;
+    u.noiseAmount.value = noiseAmount;
+    u.distortion.value = distortion;
+    const { clientWidth: wCSS, clientHeight: hCSS } = containerRef.current;
+    const { anchor, dir } = getAnchorAndDir(raysOrigin, wCSS * renderer.dpr, hCSS * renderer.dpr);
+    u.rayPos.value = anchor;
+    u.rayDir.value = dir;
+  }, [
+    raysColor, raysSpeed, lightSpread, raysOrigin, rayLength, pulsating,
+    fadeDistance, saturation, mouseInfluence, noiseAmount, distortion,
+  ]);
+
+  useEffect(() => {
+    if (!followMouse) return;
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!containerRef.current || !rendererRef.current) return;
+      const rect = containerRef.current.getBoundingClientRect();
+      mouseRef.current = {
+        x: (e.clientX - rect.left) / rect.width,
+        y: (e.clientY - rect.top) / rect.height,
+      };
+    };
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => window.removeEventListener("mousemove", handleMouseMove);
+  }, [followMouse]);
 
   return (
     <div
       ref={containerRef}
       className={className}
-      style={{ opacity: 0, transition: "opacity 1s ease-out" }}
+      style={{ width: "100%", height: "100%", opacity: 0, transition: "opacity 1.2s ease-out" }}
     />
   );
 }
