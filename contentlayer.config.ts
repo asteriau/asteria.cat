@@ -1,6 +1,6 @@
 import { defineDocumentType, makeSource } from "contentlayer2/source-files";
 
-import frappe from "@catppuccin/vscode/themes/frappe.json" with { type: "json" };
+import paradise from "./themes/paradise.json" with { type: "json" };
 
 import remarkGfm from "remark-gfm";
 import rehypePrettyCode from "rehype-pretty-code";
@@ -40,8 +40,8 @@ export default makeSource({
         rehypePrettyCode,
         {
           theme: {
-            dark: frappe,
-            light: frappe,
+            dark: paradise,
+            light: paradise,
           },
           onVisitLine(node) {
             // Prevent lines from collapsing in `display: grid` mode, and allow empty

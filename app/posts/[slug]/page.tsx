@@ -8,6 +8,7 @@ import { NotPublicHover } from "@/components/blog/NotPublicHover";
 import { getPostBySlug } from "@/lib/posts";
 import { getPostUrl } from "@/lib/site";
 import { allPosts } from "contentlayer/generated";
+import Card from "@/components/ui/Card";
 
 export async function generateStaticParams() {
   return allPosts.map((post) => ({ slug: post._raw.flattenedPath }));
@@ -44,56 +45,51 @@ export default function Page(props: { params: Promise<{ slug: string }> }) {
   if (!post) notFound();
 
   return (
-    <div className="mx-auto w-full max-w-7xl px-4 py-8 animate-page-in">
-      <div className="flex flex-col gap-8 2xl:flex-row 2xl:gap-12">
-        <article className="min-w-0 flex-1 max-w-prose">
-          <header>
-            <h1 className="mb-2 inline max-w-md text-3xl">
-              {post.public ? "" : <NotPublicHover />}
-              {post.title}
-            </h1>
+    <div className="mx-auto w-full max-w-7xl py-8 animate-page-in">
+      <Card className="p-6 md:p-8">
+        <div className="flex flex-col gap-8 2xl:flex-row 2xl:gap-12">
+          <article className="min-w-0 flex-1 max-w-prose">
+            <header>
+              <h1 className="mb-2 inline max-w-md text-3xl">
+                {post.public ? "" : <NotPublicHover />}
+                {post.title}
+              </h1>
 
-            {post.coAuthors && (
-              <div className="my-2 text-md text-neutral-200">
-                With {post.coAuthors.join(", ")}
-              </div>
-            )}
+              {post.coAuthors && (
+                <div className="my-2 text-md text-neutral-200">
+                  With {post.coAuthors.join(", ")}
+                </div>
+              )}
 
-            <div className="mb-8 text-sm text-neutral-200">
-              {format(parseISO(post.datePublished), "MMM. dd, yyyy")}
-              <span className="text-neutral-400">
-                {" "}
-                – <TimeAgo date={post.datePublished} />
-              </span>
-
-              {post.lastUpdated && (
+              <div className="mb-8 text-sm text-neutral-200">
+                {format(parseISO(post.datePublished), "MMM. dd, yyyy")}
                 <span className="text-neutral-400">
                   {" "}
-                  Last updated{" "}
-                  {format(
-                    parseISO(post.lastUpdated),
-                    "MMM. dd, yyyy",
-                  )}{" "}
-                  –{" "}
-                  <TimeAgo
-                    date={post.lastUpdated}
-                    parentheses={false}
-                  />
-                  .
+                  – <TimeAgo date={post.datePublished} />
                 </span>
-              )}
+
+                {post.lastUpdated && (
+                  <span className="text-neutral-400">
+                    {" "}
+                    Last updated{" "}
+                    {format(parseISO(post.lastUpdated), "MMM. dd, yyyy")}{" "}
+                    –{" "}
+                    <TimeAgo date={post.lastUpdated} parentheses={false} />.
+                  </span>
+                )}
+              </div>
+            </header>
+
+            <div className="prose prose-invert">
+              <DeferredMDX code={post.body.code} />
             </div>
-          </header>
+          </article>
 
-          <div className="prose prose-invert">
-            <DeferredMDX code={post.body.code} />
-          </div>
-        </article>
-
-        <aside className="2xl:sticky 2xl:top-24 2xl:w-56 2xl:shrink-0 2xl:self-start">
-          <TableOfContents />
-        </aside>
-      </div>
+          <aside className="2xl:sticky 2xl:top-8 2xl:w-56 2xl:shrink-0 2xl:self-start">
+            <TableOfContents staticMode />
+          </aside>
+        </div>
+      </Card>
     </div>
   );
 }

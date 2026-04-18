@@ -10,6 +10,7 @@ interface TocItem {
 interface TableOfContentsProps {
   className?: string;
   hasComments?: boolean;
+  staticMode?: boolean;
 }
 
 type TOCThumb = [top: number, height: number];
@@ -159,6 +160,7 @@ function TOCItem({
 export default function TableOfContents({
   className = "",
   hasComments = false,
+  staticMode = false,
 }: TableOfContentsProps) {
   const [toc, setToc] = useState<TocItem[]>([]);
   const [activeItems, setActiveItems] = useState<string[]>([]);
@@ -484,7 +486,7 @@ useEffect(() => {
     return null;
   }
 
-  if (!isLargeScreen) {
+  if (!staticMode && !isLargeScreen) {
     const currentItem = activeItems.length > 0 ? toc.find((item) => item.id === activeItems[0]) : toc[0];
 
     return (

@@ -33,7 +33,7 @@ const Card = ({ children, className = "", ...props }) => {
       className={clsx(
         className,
         "liquid-glass",
-        "flex flex-col rounded-xl overflow-hidden",
+        "flex flex-col rounded-xl overflow-clip",
         "border border-white/[0.12]",
         "bg-white/[0.04] p-4",
         "backdrop-blur-xl backdrop-saturate-[180%]",

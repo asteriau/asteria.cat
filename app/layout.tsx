@@ -77,7 +77,7 @@ export default function RootLayout({
               className={`fixed left-0 top-0 w-screen h-screen bg-paradise-bg transition-opacity duration-1000 -z-30`}
             />
             <Conditional
-              paths={["/", "/projects", "/uses"]}
+              paths={["/", "/projects", "/uses", "/blog", "/posts"]}
               defaultComponent={null}
             >
               <Suspense>

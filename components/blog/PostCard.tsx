@@ -19,7 +19,7 @@ export default function PostCard({
     : post.lastUpdated;
 
   return (
-    <div className="mb-8">
+    <div className="py-6 first:pt-0 last:pb-0">
       <h2 className="mb-1 text-xl">
         <Link
           href={post.url}
