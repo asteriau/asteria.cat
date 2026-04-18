@@ -88,11 +88,11 @@ export default async function Projects() {
   );
 
   return (
-    <div className="h-full w-full md:col-span-5 md:row-span-4 flex flex-col items-left justify-center md:grid md:grid-cols-4 md:grid-rows-4 gap-4 animate-page-in">
+    <div className="h-full w-screen max-w-full md:col-span-5 md:row-span-4 flex flex-col items-left justify-center md:grid md:grid-cols-4 md:grid-rows-4 gap-4 animate-page-in">
       {PROJECTS.map((project, i) => (
         <div
           key={project.title}
-          className="animate-stagger-in md:col-span-2 flex flex-col h-full min-h-0"
+          className="animate-stagger-in md:col-span-2 flex flex-col h-full min-h-0 w-full"
           style={{ animationDelay: `${i * STAGGER_MS}ms` }}
         >
           <ProjectCard {...project} language={languages[i]} />
@@ -124,7 +124,7 @@ function ProjectCard({
   language,
 }: ProjectData & { language: string | null }) {
   return (
-    <Card className="w-full h-full min-h-0 flex flex-col justify-between gap-3">
+    <Card className="w-screen max-w-full h-full min-h-0 flex flex-col justify-between gap-3">
       <div>
         <div className="flex flex-row items-start justify-between gap-2">
           <div>
