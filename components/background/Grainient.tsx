@@ -155,7 +155,7 @@ interface LightRaysProps {
 
 export default function LightRays({
   raysOrigin = "top-center",
-  raysColor = "#ffffff",
+  raysColor = "#8DA3B9",
   raysSpeed = 1,
   lightSpread = 1,
   rayLength = 2,
